@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nadzar Photowork - System</title>
+    <title>Nadzar Photowork - Cloud System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -16,9 +16,9 @@
 </head>
 <body id="mainBody" class="bg-[#F8FAFC] dark:bg-gray-900 text-gray-800 dark:text-gray-100 overflow-x-hidden text-sm">
 
-    <div id="loadingOverlay" class="fixed inset-0 z-[100] bg-white/80 dark:bg-gray-900/80 flex items-center justify-center hidden">
-        <div class="text-center">
-            <div class="animate-spin text-4xl mb-2 text-blue-600">🔄</div>
+    <div id="loadingOverlay" class="fixed inset-0 z-[100] bg-white/80 dark:bg-gray-900/80 flex items-center justify-center hidden text-center">
+        <div>
+            <div class="animate-spin text-4xl mb-2 text-blue-600 inline-block">🔄</div>
             <p class="font-bold text-[10px] uppercase tracking-widest text-blue-600">Sinkronisasi Cloud...</p>
         </div>
     </div>
@@ -26,7 +26,7 @@
     <div id="selectionScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-blue-600 dark:bg-blue-900 text-center">
         <div class="p-8">
             <h1 class="text-5xl font-extrabold mb-2 italic tracking-tight text-white uppercase">Nadzar</h1>
-            <p class="mb-10 opacity-70 tracking-[0.3em] uppercase text-[10px] font-bold text-white">Cloud Integrated System</p>
+            <p class="mb-10 opacity-70 tracking-[0.3em] uppercase text-[10px] font-bold text-white">Automated Cloud System</p>
             <div class="flex flex-col md:flex-row gap-6">
                 <button onclick="openApp('Pribadi')" class="group bg-white text-blue-600 px-10 py-8 rounded-[2.5rem] shadow-2xl hover:scale-105 transition-all">
                     <div class="text-4xl mb-2">👤</div>
@@ -47,23 +47,24 @@
                 <h1 class="text-4xl font-extrabold text-[#2563EB]">Nadzar Photowork</h1>
             </div>
             <div class="flex gap-2">
-                <button onclick="toggleAdmin()" class="w-12 h-12 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-md border border-gray-100 text-xl hover:bg-yellow-50">🔓</button>
-                <button onclick="tarikDataCloud()" title="Tarik Data dari Cloud" class="w-12 h-12 flex items-center justify-center bg-orange-100 text-orange-600 rounded-full hover:rotate-180 transition-all shadow-md">☁️</button>
+                <button onclick="toggleAdmin()" title="Akses Admin" class="w-12 h-12 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-md border border-gray-100 text-xl hover:bg-yellow-50">🔓</button>
+                <button onclick="tarikDataCloud()" title="Refresh Data Cloud" class="w-12 h-12 flex items-center justify-center bg-orange-100 text-orange-600 rounded-full hover:rotate-180 transition-all shadow-md">☁️</button>
                 <button id="themeToggle" class="w-12 h-12 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-md">🌙</button>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div class="lg:col-span-4 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-gray-700 h-fit">
-                <h2 id="formTitle" class="text-2xl font-bold mb-6 italic tracking-tight text-blue-600 uppercase">FORM INPUT</h2>
+                <h2 id="formTitle" class="text-2xl font-bold mb-6 italic tracking-tight text-blue-600 uppercase">ISI DATA</h2>
                 <div class="space-y-4">
                     <input type="hidden" id="editId">
+                    
                     <label id="labelNama" class="text-[10px] font-bold uppercase ml-2 opacity-50">Nama Utama</label>
-                    <input type="text" id="inputNama" class="w-full p-4 mt-1 mb-4 rounded-xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none font-bold shadow-sm focus:border-blue-500">
+                    <input type="text" id="inputNama" class="w-full p-4 mt-1 mb-4 rounded-xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none font-bold shadow-sm focus:ring-2 focus:ring-blue-500 transition">
                     
                     <div id="containerNamaKlien" class="hidden">
-                        <label class="text-[10px] font-bold uppercase ml-2 opacity-50 text-purple-600">Klien User MUA</label>
-                        <input type="text" id="inputNamaKlien" class="w-full p-4 mt-1 mb-4 rounded-xl border border-purple-100 dark:bg-gray-700 outline-none font-bold shadow-sm focus:border-purple-500">
+                        <label class="text-[10px] font-bold uppercase ml-2 opacity-50 text-purple-600">Nama User / Klien MUA</label>
+                        <input type="text" id="inputNamaKlien" class="w-full p-4 mt-1 mb-4 rounded-xl border border-purple-100 dark:bg-gray-700 outline-none font-bold shadow-sm focus:ring-2 focus:ring-purple-500 transition">
                     </div>
 
                     <div class="grid grid-cols-2 gap-2 text-xs font-bold mb-4">
@@ -77,20 +78,20 @@
                         </div>
                     </div>
 
-                    <input type="text" id="inputKontak" placeholder="WhatsApp (Contoh: 08123...)" class="w-full p-4 mb-4 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm">
+                    <input type="text" id="inputKontak" placeholder="WhatsApp (08...)" class="w-full p-4 mb-4 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm">
                     <input type="text" id="inputLokasi" placeholder="Lokasi Acara" class="w-full p-4 mb-4 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm">
-                    <textarea id="inputAlamat" placeholder="Catatan/Alamat Lengkap" rows="2" class="w-full p-4 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm"></textarea>
+                    <textarea id="inputAlamat" placeholder="Alamat Lengkap / Catatan" rows="2" class="w-full p-4 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm"></textarea>
                     
-                    <button onclick="simpanData()" class="w-full bg-[#2563EB] text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition uppercase text-[10px] tracking-widest shadow-lg">Simpan Data</button>
-                    <button onclick="cancelEdit()" id="btnCancelEdit" class="hidden w-full text-gray-400 font-bold py-2 text-[10px] uppercase">Batal Edit</button>
+                    <button onclick="simpanData()" id="btnSimpan" class="w-full bg-[#2563EB] text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition uppercase text-[10px] tracking-widest shadow-lg">Simpan & Kirim</button>
+                    <button onclick="cancelEdit()" id="btnCancelEdit" class="hidden w-full text-gray-400 font-bold py-2 text-[10px] uppercase">Batal Ubah</button>
                 </div>
             </div>
 
             <div class="lg:col-span-8 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
                 <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-                    <h2 class="text-2xl font-bold italic tracking-tight text-blue-600">Agenda Nadzar</h2>
+                    <h2 class="text-2xl font-bold italic tracking-tight text-blue-600 uppercase">Agenda Nadzar</h2>
                     <div class="flex gap-2">
-                        <button onclick="sinkronSpreadsheet()" id="syncBtn" class="hidden bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-xl text-[10px] font-bold uppercase shadow-md transition">Kirim Cloud ☁️</button>
+                        <button onclick="sinkronSpreadsheet()" id="syncBtn" class="hidden bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-xl text-[10px] font-bold uppercase shadow-md transition">Update Cloud ☁️</button>
                         <button onclick="eksporExcel()" id="eksporBtn" class="hidden bg-[#22C55E] hover:bg-green-600 text-white px-5 py-2 rounded-xl text-[10px] font-bold uppercase shadow-md transition">Excel 📥</button>
                     </div>
                 </div>
@@ -99,22 +100,22 @@
                     <table class="w-full text-left border-collapse" id="tabelUtama">
                         <thead>
                             <tr class="text-gray-400 border-b border-gray-100 dark:border-gray-700 text-[9px] uppercase font-bold tracking-widest">
-                                <th class="pb-4 pr-2">Tgl</th>
-                                <th class="pb-4 pr-2">Detail Agenda</th>
+                                <th class="pb-4 pr-2">Tanggal</th>
+                                <th class="pb-4 pr-2">Agenda & User</th>
                                 <th class="pb-4 pr-2">Paket</th>
-                                <th class="pb-4 admin-field text-center">Aksi Admin</th>
+                                <th class="pb-4 admin-field text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="isiTabel" class="divide-y divide-gray-50 dark:divide-gray-700 text-xs"></tbody>
                     </table>
-                    <div id="emptyState" class="py-20 text-center opacity-20 italic font-bold text-[10px] tracking-[0.3em] uppercase">Belum ada jadwal</div>
+                    <div id="emptyState" class="py-20 text-center opacity-20 italic font-bold text-[10px] tracking-[0.3em] uppercase">Belum ada agenda terdaftar</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // URL DEPLOY BARU ANDA
+        // URL SCRIPT GOOGLE ANDA
         const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwQbnJoZuF9CaOP6ul2eee_J-TCt04dLI6CFLcpNvTSOO73z8sgGpVhwvCyrjYGBX5L-g/exec";
         
         let currentMode = "";
@@ -123,11 +124,7 @@
 
         // OTOMATIS TARIK DATA SAAT APLIKASI DIBUKA
         window.onload = () => {
-            if(dataSimpanan.length === 0) {
-                tarikDataCloud();
-            } else {
-                muatTabel();
-            }
+            tarikDataCloud();
         };
 
         async function tarikDataCloud() {
@@ -140,10 +137,9 @@
                     dataSimpanan = cloudData;
                     localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
                     muatTabel();
-                    console.log("Data berhasil ditarik dari Cloud.");
                 }
             } catch (e) { 
-                console.warn("Cloud masih kosong atau URL salah."); 
+                console.warn("Koneksi Cloud Gagal atau Cloud Kosong."); 
             } finally { 
                 loading.classList.add('hidden'); 
             }
@@ -156,11 +152,13 @@
             const containerNamaKlien = document.getElementById('containerNamaKlien');
             
             if(mode === 'Vendor') {
+                document.getElementById('formTitle').innerText = "INPUT MUA";
                 document.getElementById('labelNama').innerText = "Nama MUA / Salon";
                 containerNamaKlien.classList.remove('hidden');
                 select.innerHTML = `<option value="Wedding">💍 Wedding</option><option value="Engagement">🎀 Engagement</option><option value="Makeup Only">💄 Makeup Only</option>`;
             } else {
-                document.getElementById('labelNama').innerText = "Nama Klien (Mempelai)";
+                document.getElementById('formTitle').innerText = "INPUT KLIEN";
+                document.getElementById('labelNama').innerText = "Nama Calon Pengantin";
                 containerNamaKlien.classList.add('hidden');
                 select.innerHTML = `<option value="Wedding">💍 Wedding</option><option value="Pre-Wed">📸 Pre-Wed</option><option value="Product">📦 Product</option><option value="Portrait">👤 Portrait</option>`;
             }
@@ -173,12 +171,13 @@
 
         function toggleAdmin() {
             if(!isAdmin) {
-                if(prompt("Masukkan Password Admin:") === "123456") {
+                const pass = prompt("Password Admin:");
+                if(pass === "123456") {
                     isAdmin = true;
                     document.getElementById('mainBody').classList.add('is-admin');
                     document.getElementById('eksporBtn').classList.remove('hidden');
                     document.getElementById('syncBtn').classList.remove('hidden');
-                } else { alert("Salah!"); }
+                } else if(pass !== null) { alert("Akses Ditolak!"); }
             } else {
                 isAdmin = false;
                 document.getElementById('mainBody').classList.remove('is-admin');
@@ -188,9 +187,9 @@
             muatTabel();
         }
 
-        function simpanData() {
+        async function simpanData() {
             const val = (id) => document.getElementById(id).value;
-            if(!val('inputNama') || !val('inputTanggal')) return alert("Nama dan Tanggal wajib diisi!");
+            if(!val('inputNama') || !val('inputTanggal')) return alert("Wajib isi Nama dan Tanggal!");
             
             const obj = {
                 id: document.getElementById('editId').value || Date.now(),
@@ -208,10 +207,28 @@
             if(idx > -1) dataSimpanan[idx] = obj;
             else dataSimpanan.push(obj);
 
+            // Tampilkan Loading
+            const loading = document.getElementById('loadingOverlay');
+            loading.classList.remove('hidden');
+
+            // 1. Simpan di Lokal
             localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
-            cancelEdit();
-            muatTabel();
-            alert("Data tersimpan di perangkat. Klik 'Kirim Cloud' (Mode Admin) agar bisa sinkron ke HP lain.");
+
+            // 2. OTOMATIS KIRIM KE CLOUD (Bisa dilakukan siapapun)
+            try {
+                await fetch(URL_SCRIPT, { 
+                    method: 'POST', 
+                    mode: 'no-cors', 
+                    body: JSON.stringify(dataSimpanan) 
+                });
+                alert("✅ Data Berhasil Disimpan & Dikirim ke Cloud!");
+            } catch (e) { 
+                alert("⚠️ Tersimpan lokal, tapi gagal kirim ke Cloud. Cek Internet."); 
+            } finally { 
+                loading.classList.add('hidden');
+                cancelEdit();
+                muatTabel();
+            }
         }
 
         function muatTabel() {
@@ -224,16 +241,16 @@
                 const fTgl = new Date(d.tgl).toLocaleDateString('id-ID', { day:'numeric', month:'short' });
                 const isVendor = d.tipe === 'Vendor';
                 
-                let infoNama = `<div class="font-bold text-gray-800 dark:text-gray-100">${d.nama}</div>`;
+                let infoNama = `<div class="font-bold text-gray-800 dark:text-gray-100 uppercase">${d.nama}</div>`;
                 if(isVendor && d.namaKlien !== "-") {
-                    infoNama += `<div class="text-[9px] text-purple-500 font-bold italic">User: ${d.namaKlien}</div>`;
+                    infoNama += `<div class="text-[9px] text-purple-500 font-black italic">USER: ${d.namaKlien}</div>`;
                 }
 
                 let row = `<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all border-b border-gray-50 dark:border-gray-800">
                     <td class="py-4 pr-2 font-black text-blue-600 uppercase text-[10px]">${fTgl}</td>
                     <td class="py-4 pr-2">
                         ${infoNama}
-                        <div class="text-[8px] font-bold uppercase opacity-30">${isVendor ? 'MUA Partner' : 'Personal'}</div>
+                        <div class="text-[8px] font-bold uppercase opacity-30">${isVendor ? 'MUA Partner' : 'Personal Client'}</div>
                     </td>
                     <td class="py-4 pr-2">
                         <span class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-[8px] font-bold uppercase text-gray-500">${d.kat}</span>
@@ -242,9 +259,9 @@
                 if(isAdmin) {
                     row += `<td class="py-4 admin-field text-center">
                         <div class="flex gap-1 justify-center">
-                            <a href="https://wa.me/${d.wa.replace(/\D/g,'')}" target="_blank" class="bg-green-500 p-2 rounded-lg text-white shadow hover:scale-110 transition">📱</a>
-                            <button onclick="editData(${d.id})" class="bg-blue-500 p-2 rounded-lg text-white shadow hover:scale-110 transition">✏️</button>
-                            <button onclick="hapusData(${d.id})" class="bg-red-500 p-2 rounded-lg text-white shadow hover:scale-110 transition">🗑️</button>
+                            <a href="https://wa.me/${d.wa.replace(/\D/g,'')}" target="_blank" class="bg-green-500 p-2 rounded-lg text-white shadow-sm hover:scale-110 transition">📱</a>
+                            <button onclick="editData(${d.id})" class="bg-blue-500 p-2 rounded-lg text-white shadow-sm hover:scale-110 transition">✏️</button>
+                            <button onclick="hapusData(${d.id})" class="bg-red-500 p-2 rounded-lg text-white shadow-sm hover:scale-110 transition">🗑️</button>
                         </div>
                     </td>`;
                 }
@@ -256,20 +273,12 @@
         async function sinkronSpreadsheet() {
             const btn = document.getElementById('syncBtn');
             btn.disabled = true;
-            btn.innerText = "⏳ Mengirim...";
+            btn.innerText = "⏳ Memperbarui...";
             try {
-                await fetch(URL_SCRIPT, { 
-                    method: 'POST', 
-                    mode: 'no-cors', 
-                    body: JSON.stringify(dataSimpanan) 
-                });
+                await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataSimpanan) });
                 alert("✅ Cloud Berhasil Diupdate!");
-            } catch (e) { 
-                alert("❌ Gagal Sinkron!"); 
-            } finally { 
-                btn.disabled = false; 
-                btn.innerText = "Kirim Cloud ☁️"; 
-            }
+            } catch (e) { alert("❌ Gagal Sinkron!"); }
+            finally { btn.disabled = false; btn.innerText = "Update Cloud ☁️"; }
         }
 
         function editData(id) {
@@ -283,18 +292,20 @@
             document.getElementById('inputAlamat').value = item.alamat;
             document.getElementById('inputKategori').value = item.kat;
             if(item.tipe === 'Vendor') document.getElementById('inputNamaKlien').value = item.namaKlien;
+            document.getElementById('btnSimpan').innerText = "Simpan Perubahan";
             document.getElementById('btnCancelEdit').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function cancelEdit() {
             document.getElementById('editId').value = '';
+            document.getElementById('btnSimpan').innerText = "Simpan & Kirim";
             ['inputNama', 'inputNamaKlien', 'inputTanggal', 'inputKontak', 'inputLokasi', 'inputAlamat'].forEach(i => document.getElementById(i).value = '');
             document.getElementById('btnCancelEdit').classList.add('hidden');
         }
 
         function hapusData(id) {
-            if(confirm("Hapus agenda ini secara permanen?")) {
+            if(confirm("Hapus agenda ini? (Jangan lupa klik Update Cloud setelah hapus)")) {
                 dataSimpanan = dataSimpanan.filter(i => i.id != id);
                 localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
                 muatTabel();
@@ -302,11 +313,10 @@
         }
 
         function eksporExcel() {
-            if(dataSimpanan.length === 0) return alert("Data kosong!");
             const ws = XLSX.utils.json_to_sheet(dataSimpanan);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Agenda Nadzar");
-            XLSX.writeFile(wb, "Agenda_Nadzar_Full.xlsx");
+            XLSX.writeFile(wb, "Nadzar_Export.xlsx");
         }
 
         document.getElementById('themeToggle').onclick = () => {
