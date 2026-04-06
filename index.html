@@ -11,7 +11,6 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s; }
         .admin-field { display: none; }
         .is-admin .admin-field { display: table-cell; }
-        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); }
     </style>
 </head>
 <body id="mainBody" class="bg-[#F8FAFC] dark:bg-gray-900 text-gray-800 dark:text-gray-100 overflow-x-hidden text-sm">
@@ -59,11 +58,13 @@
                 <div class="space-y-4">
                     <input type="hidden" id="editId">
                     <label id="labelNama" class="text-[10px] font-bold uppercase ml-2 opacity-50">Nama Utama</label>
-                    <input type="text" id="inputNama" class="w-full p-4 mt-1 mb-4 rounded-xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none font-bold shadow-sm">
+                    <input type="text" id="inputNama" class="w-full p-4 mt-1 mb-4 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none font-bold shadow-sm">
+                    
                     <div id="containerNamaKlien" class="hidden">
                         <label class="text-[10px] font-bold uppercase ml-2 opacity-50 text-purple-600">Nama User / Klien MUA</label>
                         <input type="text" id="inputNamaKlien" class="w-full p-4 mt-1 mb-4 rounded-xl border border-purple-100 dark:bg-gray-700 outline-none font-bold shadow-sm">
                     </div>
+
                     <div class="grid grid-cols-2 gap-2 text-xs font-bold mb-4">
                         <div>
                             <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Paket</label>
@@ -74,9 +75,11 @@
                             <input type="date" id="inputTanggal" class="w-full p-4 mt-1 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm">
                         </div>
                     </div>
+
                     <input type="text" id="inputKontak" placeholder="WhatsApp (08...)" class="w-full p-4 mb-4 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm">
                     <input type="text" id="inputLokasi" placeholder="Lokasi Acara" class="w-full p-4 mb-4 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm">
                     <textarea id="inputAlamat" placeholder="Alamat Lengkap / Catatan" rows="2" class="w-full p-4 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm"></textarea>
+                    
                     <button onclick="simpanData()" id="btnSimpan" class="w-full bg-[#2563EB] text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition uppercase text-[10px] tracking-widest shadow-lg">Simpan & Kirim</button>
                     <button onclick="cancelEdit()" id="btnCancelEdit" class="hidden w-full text-gray-400 font-bold py-2 text-[10px] uppercase">Batal Ubah</button>
                 </div>
@@ -86,8 +89,8 @@
                 <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
                     <h2 class="text-2xl font-bold italic tracking-tight text-blue-600 uppercase">Agenda Nadzar</h2>
                     <div class="flex gap-2">
-                        <button onclick="sinkronSpreadsheet()" id="syncBtn" class="hidden bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-xl text-[10px] font-bold uppercase shadow-md transition">Update Cloud ☁️</button>
-                        <button onclick="eksporExcel()" id="eksporBtn" class="hidden bg-[#22C55E] hover:bg-green-600 text-white px-5 py-2 rounded-xl text-[10px] font-bold uppercase shadow-md transition">Excel 📥</button>
+                        <button onclick="sinkronSpreadsheet()" id="syncBtn" class="hidden bg-orange-500 text-white px-5 py-2 rounded-xl text-[10px] font-bold uppercase shadow-md transition">Update Cloud ☁️</button>
+                        <button onclick="eksporExcel()" id="eksporBtn" class="hidden bg-[#22C55E] text-white px-5 py-2 rounded-xl text-[10px] font-bold uppercase shadow-md transition">Excel 📥</button>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
@@ -119,19 +122,16 @@
             const loading = document.getElementById('loadingOverlay');
             loading.classList.remove('hidden');
             try {
-                // Tambahkan parameter cache-busting agar browser tidak mengambil data lama
                 const response = await fetch(URL_SCRIPT + '?t=' + Date.now());
                 const cloudData = await response.json();
                 if(cloudData && Array.isArray(cloudData)) {
                     dataSimpanan = cloudData;
                     localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
-                    muatTabel();
                 }
             } catch (e) {
-                console.error("Gagal tarik data:", e);
                 dataSimpanan = JSON.parse(localStorage.getItem('nadzarData')) || [];
-                muatTabel();
             } finally { 
+                muatTabel();
                 loading.classList.add('hidden'); 
             }
         }
@@ -167,6 +167,8 @@
                     document.getElementById('mainBody').classList.add('is-admin');
                     document.getElementById('eksporBtn').classList.remove('hidden');
                     document.getElementById('syncBtn').classList.remove('hidden');
+                    
+                    // LOGIN BERHASIL -> TARIK ULANG DAN REFRESH TABEL
                     await tarikDataCloud(); 
                 } else if(pass !== null) { alert("Akses Ditolak!"); }
             } else {
@@ -185,7 +187,6 @@
             const loading = document.getElementById('loadingOverlay');
             loading.classList.remove('hidden');
 
-            // Buat objek data baru
             const obj = {
                 id: document.getElementById('editId').value || Date.now(),
                 tipe: currentMode || 'Pribadi', 
@@ -198,31 +199,22 @@
                 alamat: val('inputAlamat')
             };
 
-            // Update memori lokal aplikasi
             const idx = dataSimpanan.findIndex(i => i.id == obj.id);
             if(idx > -1) dataSimpanan[idx] = obj;
             else dataSimpanan.push(obj);
 
             try {
-                // KIRIM KE CLOUD
-                // Gunakan timeout sederhana agar tidak menunggu terlalu lama
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 detik timeout
-
                 await fetch(URL_SCRIPT, { 
                     method: 'POST', 
-                    mode: 'no-cors', // Penting agar tidak kena CORS policy
-                    body: JSON.stringify(dataSimpanan),
-                    signal: controller.signal
+                    mode: 'no-cors', 
+                    body: JSON.stringify(dataSimpanan)
                 });
-
                 localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
-                alert("✅ Berhasil Disimpan!");
+                alert("✅ Berhasil!");
                 cancelEdit();
                 muatTabel();
             } catch (e) { 
-                console.error("Kesalahan Cloud:", e);
-                alert("⚠️ Data tersimpan di HP, tapi sinkronisasi Cloud tertunda. Pastikan internet stabil."); 
+                alert("⚠️ Gagal Sinkron Cloud, tapi tersimpan di memori."); 
             } finally { 
                 loading.classList.add('hidden');
             }
@@ -233,30 +225,19 @@
             tabel.innerHTML = '';
             const sorted = [...dataSimpanan].sort((a,b) => new Date(a.tgl) - new Date(b.tgl));
             
-            if(sorted.length === 0) {
-                document.getElementById('emptyState').classList.remove('hidden');
-                document.getElementById('emptyState').innerText = "Belum ada agenda terdaftar";
-            } else {
-                document.getElementById('emptyState').classList.add('hidden');
-            }
+            document.getElementById('emptyState').classList.toggle('hidden', sorted.length > 0);
+            if(sorted.length === 0) document.getElementById('emptyState').innerText = "Belum ada agenda";
 
             sorted.forEach(d => {
                 const fTgl = new Date(d.tgl).toLocaleDateString('id-ID', { day:'numeric', month:'short' });
                 const isVendor = d.tipe === 'Vendor';
                 let infoNama = `<div class="font-bold text-gray-800 dark:text-gray-100 uppercase">${d.nama}</div>`;
-                if(isVendor && d.namaKlien !== "-") {
-                    infoNama += `<div class="text-[9px] text-purple-500 font-black italic">USER: ${d.namaKlien}</div>`;
-                }
+                if(isVendor && d.namaKlien !== "-") infoNama += `<div class="text-[9px] text-purple-500 font-black italic">USER: ${d.namaKlien}</div>`;
 
-                let row = `<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all border-b border-gray-50 dark:border-gray-800">
+                let row = `<tr class="border-b border-gray-50 dark:border-gray-800">
                     <td class="py-4 pr-2 font-black text-blue-600 uppercase text-[10px]">${fTgl}</td>
-                    <td class="py-4 pr-2">
-                        ${infoNama}
-                        <div class="text-[8px] font-bold uppercase opacity-30">${isVendor ? 'MUA' : 'KLIEN'}</div>
-                    </td>
-                    <td class="py-4 pr-2">
-                        <span class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-[8px] font-bold uppercase text-gray-500">${d.kat}</span>
-                    </td>`;
+                    <td class="py-4 pr-2">${infoNama}<div class="text-[8px] font-bold uppercase opacity-30">${isVendor ? 'MUA' : 'KLIEN'}</div></td>
+                    <td class="py-4 pr-2"><span class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-[8px] font-bold uppercase">${d.kat}</span></td>`;
                 
                 if(isAdmin) {
                     row += `<td class="py-4 admin-field text-center">
@@ -274,18 +255,16 @@
 
         async function sinkronSpreadsheet() {
             const btn = document.getElementById('syncBtn');
-            btn.disabled = true;
-            btn.innerText = "⏳ Memperbarui...";
+            btn.innerText = "⏳...";
             try {
                 await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataSimpanan) });
-                alert("✅ Cloud Berhasil Diupdate!");
-            } catch (e) { alert("❌ Gagal Sinkron!"); }
-            finally { btn.disabled = false; btn.innerText = "Update Cloud ☁️"; }
+                alert("✅ Cloud Updated!");
+            } catch (e) { alert("❌ Gagal!"); }
+            finally { btn.innerText = "Update Cloud ☁️"; }
         }
 
         function editData(id) {
             const item = dataSimpanan.find(i => i.id == id);
-            // Jangan ganti mode secara paksa agar tidak bingung
             document.getElementById('editId').value = item.id;
             document.getElementById('inputNama').value = item.nama;
             document.getElementById('inputTanggal').value = item.tgl;
@@ -293,15 +272,10 @@
             document.getElementById('inputLokasi').value = item.lokasi;
             document.getElementById('inputAlamat').value = item.alamat;
             document.getElementById('inputKategori').value = item.kat;
-            
-            const containerNamaKlien = document.getElementById('containerNamaKlien');
             if(item.tipe === 'Vendor') {
-                containerNamaKlien.classList.remove('hidden');
+                document.getElementById('containerNamaKlien').classList.remove('hidden');
                 document.getElementById('inputNamaKlien').value = item.namaKlien;
-            } else {
-                containerNamaKlien.classList.add('hidden');
             }
-
             document.getElementById('btnSimpan').innerText = "Simpan Perubahan";
             document.getElementById('btnCancelEdit').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -315,7 +289,7 @@
         }
 
         function hapusData(id) {
-            if(confirm("Hapus agenda ini? (Klik Update Cloud setelah hapus agar sinkron)")) {
+            if(confirm("Hapus?")) {
                 dataSimpanan = dataSimpanan.filter(i => i.id != id);
                 localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
                 muatTabel();
@@ -325,13 +299,12 @@
         function eksporExcel() {
             const ws = XLSX.utils.json_to_sheet(dataSimpanan);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Agenda Nadzar");
-            XLSX.writeFile(wb, "Nadzar_Export.xlsx");
+            XLSX.utils.book_append_sheet(wb, ws, "Agenda");
+            XLSX.writeFile(wb, "Agenda_Nadzar.xlsx");
         }
 
         document.getElementById('themeToggle').onclick = () => {
             document.documentElement.classList.toggle('dark');
-            document.getElementById('themeToggle').innerText = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
         };
     </script>
 </body>
