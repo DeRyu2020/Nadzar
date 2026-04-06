@@ -16,7 +16,7 @@
 </head>
 <body id="mainBody" class="bg-[#F8FAFC] dark:bg-gray-900 text-gray-800 dark:text-gray-100 overflow-x-hidden text-sm">
 
-    <div id="loadingOverlay" class="fixed inset-0 z-[100] bg-white/80 dark:bg-gray-900/80 flex items-center justify-center hidden text-center">
+    <div id="loadingOverlay" class="fixed inset-0 z-[100] bg-white/90 dark:bg-gray-900/90 flex items-center justify-center hidden text-center">
         <div>
             <div class="animate-spin text-4xl mb-2 text-blue-600 inline-block">🔄</div>
             <p class="font-bold text-[10px] uppercase tracking-widest text-blue-600">Sinkronisasi Cloud...</p>
@@ -58,15 +58,12 @@
                 <h2 id="formTitle" class="text-2xl font-bold mb-6 italic tracking-tight text-blue-600 uppercase">ISI DATA</h2>
                 <div class="space-y-4">
                     <input type="hidden" id="editId">
-                    
                     <label id="labelNama" class="text-[10px] font-bold uppercase ml-2 opacity-50">Nama Utama</label>
-                    <input type="text" id="inputNama" class="w-full p-4 mt-1 mb-4 rounded-xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none font-bold shadow-sm focus:ring-2 focus:ring-blue-500 transition">
-                    
+                    <input type="text" id="inputNama" class="w-full p-4 mt-1 mb-4 rounded-xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none font-bold shadow-sm">
                     <div id="containerNamaKlien" class="hidden">
                         <label class="text-[10px] font-bold uppercase ml-2 opacity-50 text-purple-600">Nama User / Klien MUA</label>
-                        <input type="text" id="inputNamaKlien" class="w-full p-4 mt-1 mb-4 rounded-xl border border-purple-100 dark:bg-gray-700 outline-none font-bold shadow-sm focus:ring-2 focus:ring-purple-500 transition">
+                        <input type="text" id="inputNamaKlien" class="w-full p-4 mt-1 mb-4 rounded-xl border border-purple-100 dark:bg-gray-700 outline-none font-bold shadow-sm">
                     </div>
-
                     <div class="grid grid-cols-2 gap-2 text-xs font-bold mb-4">
                         <div>
                             <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Paket</label>
@@ -77,11 +74,9 @@
                             <input type="date" id="inputTanggal" class="w-full p-4 mt-1 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm">
                         </div>
                     </div>
-
                     <input type="text" id="inputKontak" placeholder="WhatsApp (08...)" class="w-full p-4 mb-4 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm">
                     <input type="text" id="inputLokasi" placeholder="Lokasi Acara" class="w-full p-4 mb-4 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm">
                     <textarea id="inputAlamat" placeholder="Alamat Lengkap / Catatan" rows="2" class="w-full p-4 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm"></textarea>
-                    
                     <button onclick="simpanData()" id="btnSimpan" class="w-full bg-[#2563EB] text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition uppercase text-[10px] tracking-widest shadow-lg">Simpan & Kirim</button>
                     <button onclick="cancelEdit()" id="btnCancelEdit" class="hidden w-full text-gray-400 font-bold py-2 text-[10px] uppercase">Batal Ubah</button>
                 </div>
@@ -95,38 +90,32 @@
                         <button onclick="eksporExcel()" id="eksporBtn" class="hidden bg-[#22C55E] hover:bg-green-600 text-white px-5 py-2 rounded-xl text-[10px] font-bold uppercase shadow-md transition">Excel 📥</button>
                     </div>
                 </div>
-                
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse" id="tabelUtama">
                         <thead>
                             <tr class="text-gray-400 border-b border-gray-100 dark:border-gray-700 text-[9px] uppercase font-bold tracking-widest">
-                                <th class="pb-4 pr-2">Tanggal</th>
-                                <th class="pb-4 pr-2">Agenda & User</th>
+                                <th class="pb-4 pr-2">Tgl</th>
+                                <th class="pb-4 pr-2">Agenda</th>
                                 <th class="pb-4 pr-2">Paket</th>
                                 <th class="pb-4 admin-field text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="isiTabel" class="divide-y divide-gray-50 dark:divide-gray-700 text-xs"></tbody>
                     </table>
-                    <div id="emptyState" class="py-20 text-center opacity-20 italic font-bold text-[10px] tracking-[0.3em] uppercase">Belum ada agenda terdaftar</div>
+                    <div id="emptyState" class="py-20 text-center opacity-20 italic font-bold text-[10px] tracking-[0.3em] uppercase">Memuat Data...</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // URL SCRIPT GOOGLE ANDA
         const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwQbnJoZuF9CaOP6ul2eee_J-TCt04dLI6CFLcpNvTSOO73z8sgGpVhwvCyrjYGBX5L-g/exec";
         
         let currentMode = "";
         let isAdmin = false;
-        let dataSimpanan = JSON.parse(localStorage.getItem('nadzarData')) || [];
+        let dataSimpanan = []; // Kosongkan dulu agar tarik dari cloud
 
-        // OTOMATIS TARIK DATA SAAT APLIKASI DIBUKA
-        window.onload = () => {
-            tarikDataCloud();
-        };
-
+        // FUNGSI UTAMA: TARIK DATA DARI CLOUD
         async function tarikDataCloud() {
             const loading = document.getElementById('loadingOverlay');
             loading.classList.remove('hidden');
@@ -138,8 +127,10 @@
                     localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
                     muatTabel();
                 }
-            } catch (e) { 
-                console.warn("Koneksi Cloud Gagal atau Cloud Kosong."); 
+            } catch (e) {
+                // Jika cloud gagal, baru ambil dari lokal
+                dataSimpanan = JSON.parse(localStorage.getItem('nadzarData')) || [];
+                muatTabel();
             } finally { 
                 loading.classList.add('hidden'); 
             }
@@ -152,12 +143,10 @@
             const containerNamaKlien = document.getElementById('containerNamaKlien');
             
             if(mode === 'Vendor') {
-                document.getElementById('formTitle').innerText = "INPUT MUA";
                 document.getElementById('labelNama').innerText = "Nama MUA / Salon";
                 containerNamaKlien.classList.remove('hidden');
                 select.innerHTML = `<option value="Wedding">💍 Wedding</option><option value="Engagement">🎀 Engagement</option><option value="Makeup Only">💄 Makeup Only</option>`;
             } else {
-                document.getElementById('formTitle').innerText = "INPUT KLIEN";
                 document.getElementById('labelNama').innerText = "Nama Calon Pengantin";
                 containerNamaKlien.classList.add('hidden');
                 select.innerHTML = `<option value="Wedding">💍 Wedding</option><option value="Pre-Wed">📸 Pre-Wed</option><option value="Product">📦 Product</option><option value="Portrait">👤 Portrait</option>`;
@@ -166,7 +155,9 @@
             document.getElementById('selectionScreen').style.display = 'none';
             document.getElementById('mainContent').classList.remove('hidden');
             setTimeout(() => document.getElementById('mainContent').classList.add('opacity-100'), 50);
-            muatTabel();
+            
+            // Saat menu dipilih, pastikan tarik data terbaru
+            tarikDataCloud();
         }
 
         function toggleAdmin() {
@@ -191,6 +182,9 @@
             const val = (id) => document.getElementById(id).value;
             if(!val('inputNama') || !val('inputTanggal')) return alert("Wajib isi Nama dan Tanggal!");
             
+            // Tarik data terbaru dulu dari cloud sebelum simpan agar ID tidak bentrok
+            await tarikDataCloud();
+
             const obj = {
                 id: document.getElementById('editId').value || Date.now(),
                 tipe: currentMode, 
@@ -207,27 +201,24 @@
             if(idx > -1) dataSimpanan[idx] = obj;
             else dataSimpanan.push(obj);
 
-            // Tampilkan Loading
             const loading = document.getElementById('loadingOverlay');
             loading.classList.remove('hidden');
 
-            // 1. Simpan di Lokal
-            localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
-
-            // 2. OTOMATIS KIRIM KE CLOUD (Bisa dilakukan siapapun)
             try {
+                // Langsung hajar kirim ke cloud
                 await fetch(URL_SCRIPT, { 
                     method: 'POST', 
                     mode: 'no-cors', 
                     body: JSON.stringify(dataSimpanan) 
                 });
-                alert("✅ Data Berhasil Disimpan & Dikirim ke Cloud!");
-            } catch (e) { 
-                alert("⚠️ Tersimpan lokal, tapi gagal kirim ke Cloud. Cek Internet."); 
-            } finally { 
-                loading.classList.add('hidden');
+                localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
+                alert("✅ Berhasil! Data sudah masuk ke Agenda.");
                 cancelEdit();
                 muatTabel();
+            } catch (e) { 
+                alert("❌ Gagal kirim ke Cloud."); 
+            } finally { 
+                loading.classList.add('hidden');
             }
         }
 
@@ -235,12 +226,17 @@
             const tabel = document.getElementById('isiTabel');
             tabel.innerHTML = '';
             const sorted = [...dataSimpanan].sort((a,b) => new Date(a.tgl) - new Date(b.tgl));
-            document.getElementById('emptyState').classList.toggle('hidden', sorted.length > 0);
+            
+            if(sorted.length === 0) {
+                document.getElementById('emptyState').classList.remove('hidden');
+                document.getElementById('emptyState').innerText = "Belum ada agenda terdaftar";
+            } else {
+                document.getElementById('emptyState').classList.add('hidden');
+            }
 
             sorted.forEach(d => {
                 const fTgl = new Date(d.tgl).toLocaleDateString('id-ID', { day:'numeric', month:'short' });
                 const isVendor = d.tipe === 'Vendor';
-                
                 let infoNama = `<div class="font-bold text-gray-800 dark:text-gray-100 uppercase">${d.nama}</div>`;
                 if(isVendor && d.namaKlien !== "-") {
                     infoNama += `<div class="text-[9px] text-purple-500 font-black italic">USER: ${d.namaKlien}</div>`;
@@ -250,7 +246,7 @@
                     <td class="py-4 pr-2 font-black text-blue-600 uppercase text-[10px]">${fTgl}</td>
                     <td class="py-4 pr-2">
                         ${infoNama}
-                        <div class="text-[8px] font-bold uppercase opacity-30">${isVendor ? 'MUA Partner' : 'Personal Client'}</div>
+                        <div class="text-[8px] font-bold uppercase opacity-30">${isVendor ? 'MUA' : 'KLIEN'}</div>
                     </td>
                     <td class="py-4 pr-2">
                         <span class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-[8px] font-bold uppercase text-gray-500">${d.kat}</span>
@@ -259,9 +255,9 @@
                 if(isAdmin) {
                     row += `<td class="py-4 admin-field text-center">
                         <div class="flex gap-1 justify-center">
-                            <a href="https://wa.me/${d.wa.replace(/\D/g,'')}" target="_blank" class="bg-green-500 p-2 rounded-lg text-white shadow-sm hover:scale-110 transition">📱</a>
-                            <button onclick="editData(${d.id})" class="bg-blue-500 p-2 rounded-lg text-white shadow-sm hover:scale-110 transition">✏️</button>
-                            <button onclick="hapusData(${d.id})" class="bg-red-500 p-2 rounded-lg text-white shadow-sm hover:scale-110 transition">🗑️</button>
+                            <a href="https://wa.me/${d.wa.replace(/\D/g,'')}" target="_blank" class="bg-green-500 p-2 rounded-lg text-white">📱</a>
+                            <button onclick="editData(${d.id})" class="bg-blue-500 p-2 rounded-lg text-white">✏️</button>
+                            <button onclick="hapusData(${d.id})" class="bg-red-500 p-2 rounded-lg text-white">🗑️</button>
                         </div>
                     </td>`;
                 }
@@ -305,7 +301,7 @@
         }
 
         function hapusData(id) {
-            if(confirm("Hapus agenda ini? (Jangan lupa klik Update Cloud setelah hapus)")) {
+            if(confirm("Hapus agenda ini? (Klik Update Cloud setelah hapus agar sinkron)")) {
                 dataSimpanan = dataSimpanan.filter(i => i.id != id);
                 localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
                 muatTabel();
