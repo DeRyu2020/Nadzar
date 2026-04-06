@@ -298,21 +298,16 @@
             }
         }
 
-        // PERBAIKAN: Fungsi async dan await tarikDataCloud
         async function toggleAdmin() {
             if(!isAdmin) {
                 const pass = prompt("Password Admin:");
                 if(pass === "123456") {
                     isAdmin = true;
-                    // Munculkan overlay loading secara manual sebelum fetch
                     document.getElementById('loadingOverlay').classList.remove('hidden');
-                    
                     document.getElementById('mainBody').classList.add('is-admin');
                     document.getElementById('adminControls').classList.remove('hidden');
                     document.getElementById('btnLock').innerText = "🔒";
                     updateBadge();
-                    
-                    // Tunggu tarik data cloud selesai
                     await tarikDataCloud(true); 
                 } else if(pass !== null) { alert("Akses Ditolak!"); }
             } else {
@@ -358,20 +353,37 @@
             finally { loading.classList.add('hidden'); }
         }
 
+        // PERBAIKAN: Fungsi EditData dengan Format Tanggal Otomatis
         function editData(id) {
             const item = dataSimpanan.find(i => i.id == id);
             if(!item) return;
+
             document.getElementById('editId').value = item.id;
             document.getElementById('inputNama').value = item.nama || '';
-            document.getElementById('inputTanggal').value = item.tgl || '';
+            
+            // Konversi tanggal ke format YYYY-MM-DD (Wajib untuk input tipe date)
+            if (item.tgl) {
+                const dateObj = new Date(item.tgl);
+                if (!isNaN(dateObj.getTime())) {
+                    const formattedDate = dateObj.toISOString().split('T')[0];
+                    document.getElementById('inputTanggal').value = formattedDate;
+                } else {
+                    document.getElementById('inputTanggal').value = item.tgl;
+                }
+            }
+
             document.getElementById('inputKontak').value = item.wa || '';
             document.getElementById('inputLokasi').value = item.lokasi || '';
             document.getElementById('inputAlamat').value = item.alamat || '';
             document.getElementById('inputKategori').value = item.kat || '';
+            
             if(item.tipe === 'Vendor') {
                 document.getElementById('containerNamaKlien').classList.remove('hidden');
                 document.getElementById('inputNamaKlien').value = item.namaKlien || '';
+            } else {
+                document.getElementById('containerNamaKlien').classList.add('hidden');
             }
+
             document.getElementById('btnSimpan').innerText = "Update Data";
             document.getElementById('btnCancelEdit').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
