@@ -123,22 +123,44 @@
         try {
             const localData = localStorage.getItem('nadzarData');
             dataSimpanan = localData ? JSON.parse(localData) : [];
-            if (!Array.isArray(dataSimpanan)) dataSimpanan = [];
-        } catch (e) {
-            dataSimpanan = [];
-        }
+        } catch (e) { dataSimpanan = []; }
 
-        function openApp(mode) {
+        // FUNGSI UTAMA SAAT KLIK TOMBOL AWAL (DITAMBAH AUTO-SYNC)
+        async function openApp(mode) {
+            // Tampilkan loading overlay
+            const loading = document.getElementById('loadingOverlay');
+            loading.classList.remove('hidden');
+
+            try {
+                // Proses Sinkronisasi Cloud dulu sebelum masuk
+                const response = await fetch(URL_SCRIPT + '?t=' + Date.now());
+                const cloudData = await response.json();
+                if(cloudData && Array.isArray(cloudData)) {
+                    dataSimpanan = cloudData;
+                    localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
+                }
+            } catch (e) {
+                console.warn("Gagal sinkron awal, menggunakan data lokal.");
+            }
+
+            // Setelah beres sinkron (atau gagal), baru buka layar aplikasi
             document.getElementById('selectionScreen').style.display = 'none';
             document.getElementById('mainContent').classList.remove('hidden');
             setTimeout(() => document.getElementById('mainContent').classList.add('opacity-100'), 50);
 
             currentMode = mode;
             updateBadge();
+            aturPilihanPaket(mode);
             
+            try { muatTabel(); } catch(e) {}
+            
+            // Hilangkan loading
+            loading.classList.add('hidden');
+        }
+
+        function aturPilihanPaket(mode) {
             const select = document.getElementById('inputKategori');
             const containerNamaKlien = document.getElementById('containerNamaKlien');
-            
             if(mode === 'Vendor') {
                 document.getElementById('labelNama').innerText = "Nama MUA / Salon";
                 containerNamaKlien.classList.remove('hidden');
@@ -148,23 +170,18 @@
                 containerNamaKlien.classList.add('hidden');
                 select.innerHTML = `<option value="Wedding">💍 Wedding</option><option value="Pre-Wed">📸 Pre-Wed</option><option value="Product">📦 Product</option><option value="Portrait">👤 Portrait</option>`;
             }
-
-            try { muatTabel(); } catch(e) { console.error("Gagal muat tabel:", e); }
         }
 
         function formatTanggalIndo(tglString) {
             if(!tglString) return "-";
             const d = new Date(tglString);
-            const tgl = String(d.getDate()).padStart(2, '0');
-            const bln = String(d.getMonth() + 1).padStart(2, '0');
-            const thn = d.getFullYear();
-            return `${tgl}-${bln}-${thn}`;
+            if(isNaN(d.getTime())) return tglString;
+            return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
         }
 
         function formatWA(no) {
             if(!no) return "";
             let cleaned = no.toString().trim();
-            // Jika diawali angka 8, tambahkan 0
             if(cleaned.startsWith('8')) return '0' + cleaned;
             return cleaned;
         }
@@ -181,8 +198,6 @@
 
             sorted.forEach(d => {
                 const fTgl = formatTanggalIndo(d.tgl);
-                const noWA = formatWA(d.wa);
-                
                 const isVendor = d.tipe === 'Vendor';
                 let infoNama = `<div class="font-bold text-gray-800 dark:text-gray-100 uppercase">${d.nama || 'No Name'}</div>`;
                 if(isVendor && d.namaKlien && d.namaKlien !== "-") {
@@ -196,6 +211,7 @@
                     <td class="py-4 pr-2"><span class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-[8px] font-bold uppercase">${d.kat || '-'}</span></td>`;
                 
                 if(isAdmin) {
+                    const noWA = formatWA(d.wa);
                     const waLink = noWA.startsWith('0') ? '62' + noWA.substring(1) : noWA;
                     row += `<td class="py-4 text-center">
                         <div class="flex gap-1 justify-center">
@@ -221,11 +237,11 @@
                     localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
                     muatTabel();
                     loading.classList.add('hidden');
-                    setTimeout(() => alert("✅ Sinkron Cloud Berhasil!"), 100);
+                    setTimeout(() => alert("✅ Sinkron Berhasil!"), 50);
                 }
             } catch (e) {
                 loading.classList.add('hidden');
-                alert("❌ Gagal Tarik Cloud!");
+                alert("❌ Gagal Sinkron!");
             }
         }
 
@@ -276,7 +292,7 @@
                 namaKlien: currentMode === 'Vendor' ? val('inputNamaKlien') : "-",
                 kat: val('inputKategori'), 
                 tgl: val('inputTanggal'),
-                wa: formatWA(val('inputKontak')), // Simpan dengan format 08...
+                wa: formatWA(val('inputKontak')),
                 lokasi: val('inputLokasi'), 
                 alamat: val('inputAlamat')
             };
@@ -288,20 +304,10 @@
             try {
                 await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataSimpanan) });
                 localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
-                alert("✅ Tersimpan ke Cloud!");
+                alert("✅ Data Terkirim!");
                 cancelEdit();
                 muatTabel();
-            } catch (e) { alert("⚠️ Tersimpan Lokal!"); }
-            finally { loading.classList.add('hidden'); }
-        }
-
-        async function sinkronSpreadsheet() {
-            const loading = document.getElementById('loadingOverlay');
-            loading.classList.remove('hidden');
-            try {
-                await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataSimpanan) });
-                alert("✅ Spreadsheet Diupdate!");
-            } catch (e) { alert("❌ Gagal Sinkron!"); }
+            } catch (e) { alert("⚠️ Simpan Lokal!"); }
             finally { loading.classList.add('hidden'); }
         }
 
@@ -332,7 +338,7 @@
         }
 
         function hapusData(id) {
-            if(confirm("Hapus data ini?")) {
+            if(confirm("Hapus agenda?")) {
                 dataSimpanan = dataSimpanan.filter(i => i.id != id);
                 localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
                 muatTabel();
