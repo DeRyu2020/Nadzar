@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nadzar Photowork - System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s; }
+        .admin-field { display: none; }
+        .is-admin .admin-field { display: table-cell; }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); }
+        /* Baris tabel lebih rapat */
+        td { vertical-align: middle !important; }
+    </style>
+</head>
+<body id="mainBody" class="bg-[#F8FAFC] dark:bg-gray-900 text-gray-800 dark:text-gray-100 overflow-x-hidden text-sm">
+
+    <div id="selectionScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-blue-600 dark:bg-blue-900 text-center">
+        <div class="p-8">
+            <h1 class="text-5xl font-extrabold mb-2 italic tracking-tight text-white">Nadzar Photowork</h1>
+            <p class="mb-10 opacity-70 tracking-[0.3em] uppercase text-[10px] font-bold text-white">Sistem Manajemen Jadwal</p>
+            <div class="flex flex-col md:flex-row gap-6">
+                <button onclick="openApp('Pribadi')" class="group bg-white text-blue-600 px-10 py-8 rounded-[2.5rem] shadow-2xl hover:scale-105 transition-all">
+                    <div class="text-4xl mb-2">👤</div>
+                    <div class="text-xl font-bold uppercase tracking-widest text-blue-600">Input Klien</div>
+                </button>
+                <button onclick="openApp('Vendor')" class="group bg-blue-500 text-white px-10 py-8 rounded-[2.5rem] shadow-2xl hover:scale-105 border-2 border-blue-400 transition-all">
+                    <div class="text-4xl mb-2">💄</div>
+                    <div class="text-xl font-bold uppercase tracking-widest text-white">Input MUA</div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainContent" class="hidden opacity-0 transition-opacity duration-700 container mx-auto p-4 md:p-10 max-w-7xl">
+        <div class="flex justify-between items-start mb-10">
+            <div>
+                <div id="badgeMode" class="bg-blue-100 text-blue-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block italic border border-blue-200">MODE: PRIBADI</div>
+                <h1 class="text-4xl font-extrabold text-[#2563EB]">Nadzar Photowork</h1>
+            </div>
+            <div class="flex gap-2">
+                <button id="adminUnlockBtn" onclick="toggleAdmin()" class="w-12 h-12 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-md hover:bg-yellow-50 transition-all border border-gray-100 text-xl">🔓</button>
+                <button onclick="location.reload()" class="w-12 h-12 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-full hover:rotate-180 transition-all">🔄</button>
+                <button id="themeToggle" class="w-12 h-12 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-md">🌙</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-4 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-gray-700 h-fit">
+                <h2 id="formTitle" class="text-2xl font-bold mb-6 italic tracking-tight text-blue-600 uppercase text-center">FORM INPUT</h2>
+                <div class="space-y-4">
+                    <input type="hidden" id="editId">
+                    
+                    <label id="labelNama" class="text-[10px] font-bold uppercase ml-2 opacity-50">Nama Utama</label>
+                    <input type="text" id="inputNama" class="w-full p-4 mt-1 mb-4 rounded-xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none transition font-bold shadow-sm">
+                    
+                    <div id="containerNamaKlien" class="hidden">
+                        <label class="text-[10px] font-bold uppercase ml-2 opacity-50 text-purple-600">Nama Klien (MUA User)</label>
+                        <input type="text" id="inputNamaKlien" class="w-full p-4 mt-1 mb-4 rounded-xl border border-purple-100 dark:bg-gray-700 dark:border-purple-900 outline-none transition font-bold shadow-sm">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-xs font-bold mb-4">
+                        <div>
+                            <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Paket</label>
+                            <select id="inputKategori" class="w-full p-4 mt-1 rounded-xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none shadow-sm"></select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Tanggal</label>
+                            <input type="date" id="inputTanggal" class="w-full p-4 mt-1 rounded-xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none shadow-sm">
+                        </div>
+                    </div>
+
+                    <label class="text-[10px] font-bold uppercase ml-2 opacity-50">WhatsApp</label>
+                    <input type="text" id="inputKontak" placeholder="08..." class="w-full p-4 mt-1 mb-4 rounded-xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none shadow-sm">
+                    
+                    <label id="labelLokasi" class="text-[10px] font-bold uppercase ml-2 opacity-50">Lokasi</label>
+                    <input type="text" id="inputLokasi" class="w-full p-4 mt-1 mb-4 rounded-xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none shadow-sm">
+                    
+                    <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Catatan Tambahan</label>
+                    <textarea id="inputAlamat" rows="2" class="w-full p-4 mt-1 rounded-xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none shadow-sm"></textarea>
+                    
+                    <button id="btnSimpan" onclick="simpanData()" class="w-full bg-[#2563EB] text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition shadow-lg uppercase text-[10px] tracking-widest">Simpan Data</button>
+                    <button id="btnCancelEdit" onclick="cancelEdit()" class="hidden w-full text-gray-400 font-bold py-2 text-[10px] uppercase">Batal</button>
+                </div>
+            </div>
+
+            <div class="lg:col-span-8 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                    <h2 class="text-2xl font-bold italic tracking-tight text-blue-600">Agenda Nadzar</h2>
+                    <div class="flex flex-col gap-2 w-full md:w-auto text-center">
+                        <div class="flex gap-2">
+                            <button onclick="sinkronSpreadsheet()" id="syncBtn" class="hidden bg-orange-500 hover:bg-orange-600 text-white px-5 py-2 rounded-xl text-[10px] font-bold uppercase transition shadow-lg w-full md:w-auto">
+                                <span id="syncText">Sinkron Cloud ☁️</span>
+                            </button>
+                            <button onclick="eksporExcel()" id="eksporBtn" class="hidden bg-[#22C55E] hover:bg-green-600 text-white px-5 py-2 rounded-xl text-[10px] font-bold uppercase transition shadow-lg w-full md:w-auto">Excel 📥</button>
+                        </div>
+                        <a href="https://docs.google.com/spreadsheets/d/1TD4HrCWilYqEVZj0O3573V21TJXKMODXMyqJ06kzQtk/edit?usp=sharing" target="_blank" id="viewSheetBtn" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl text-[10px] font-bold uppercase transition shadow-lg text-center">
+                            Lihat Rekapan 📊
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse" id="tabelUtama">
+                        <thead>
+                            <tr class="text-gray-400 border-b border-gray-100 dark:border-gray-700 text-[9px] uppercase font-bold tracking-widest">
+                                <th class="pb-4 pr-2">Tanggal</th>
+                                <th class="pb-4 pr-2">Nama & Status</th>
+                                <th class="pb-4 pr-2">Paket</th>
+                                <th class="pb-4 admin-field">Lokasi & Kontak</th>
+                                <th class="pb-4 admin-field text-center">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="isiTabel" class="divide-y divide-gray-50 dark:divide-gray-700 text-xs"></tbody>
+                    </table>
+                    <div id="emptyState" class="py-20 text-center opacity-20 italic uppercase font-bold text-[10px] tracking-[0.3em]">Agenda Kosong</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const URL_SPREADSHEET_ANDA = "https://script.google.com/macros/s/AKfycby1SAN4_x9XQYusirGuhyD0TGwgJagtJl00AGPRALAiNLzppjkXsnsQA_J70wHhb8CCfg/exec";
+        let currentMode = "";
+        let isAdmin = false;
+        let dataSimpanan = JSON.parse(localStorage.getItem('nadzarData')) || [];
+
+        function openApp(mode) {
+            currentMode = mode;
+            document.getElementById('badgeMode').innerText = "AKSES: " + mode;
+            const select = document.getElementById('inputKategori');
+            const containerNamaKlien = document.getElementById('containerNamaKlien');
+
+            if(mode === 'Vendor') {
+                document.getElementById('formTitle').innerText = "Input MUA";
+                document.getElementById('labelNama').innerText = "Nama MUA / Salon";
+                containerNamaKlien.classList.remove('hidden');
+                select.innerHTML = `<option value="Wedding">💍 Wedding</option><option value="Engagement">🎀 Engagement</option><option value="Makeup Only">💄 Makeup Only</option>`;
+            } else {
+                document.getElementById('formTitle').innerText = "Input Klien";
+                document.getElementById('labelNama').innerText = "Nama Klien";
+                containerNamaKlien.classList.add('hidden');
+                select.innerHTML = `<option value="Wedding">💍 Wedding</option><option value="Pre-Wed">📸 Pre-Wed</option><option value="Product">📦 Product</option><option value="Portrait">👤 Portrait</option>`;
+            }
+
+            document.getElementById('selectionScreen').classList.add('opacity-0', 'scale-110');
+            setTimeout(() => {
+                document.getElementById('selectionScreen').style.display = 'none';
+                document.getElementById('mainContent').classList.remove('hidden');
+                setTimeout(() => document.getElementById('mainContent').classList.add('opacity-100'), 50);
+                muatTabel();
+            }, 500);
+        }
+
+        function toggleAdmin() {
+            if(!isAdmin) {
+                if(prompt("Password Admin:") === "123456") {
+                    isAdmin = true;
+                    document.getElementById('mainBody').classList.add('is-admin');
+                    document.getElementById('eksporBtn').classList.remove('hidden');
+                    document.getElementById('syncBtn').classList.remove('hidden');
+                    document.getElementById('viewSheetBtn').classList.remove('hidden');
+                } else { alert("Akses Ditolak!"); }
+            } else {
+                isAdmin = false;
+                document.getElementById('mainBody').classList.remove('is-admin');
+                document.getElementById('eksporBtn').classList.add('hidden');
+                document.getElementById('syncBtn').classList.add('hidden');
+                document.getElementById('viewSheetBtn').classList.add('hidden');
+            }
+            muatTabel();
+        }
+
+        function simpanData() {
+            const val = (id) => document.getElementById(id).value;
+            if(!val('inputNama') || !val('inputTanggal')) return alert("Nama dan Tanggal wajib!");
+
+            const eid = val('editId');
+            const isVendor = currentMode === 'Vendor';
+            
+            const obj = {
+                id: eid ? parseInt(eid) : Date.now(),
+                tipe: currentMode, 
+                nama: val('inputNama'),
+                namaKlien: isVendor ? val('inputNamaKlien') : "-",
+                kat: val('inputKategori'), 
+                tgl: val('inputTanggal'),
+                wa: val('inputKontak'), 
+                lokasi: val('inputLokasi'), 
+                alamat: val('inputAlamat')
+            };
+
+            if(eid) dataSimpanan = dataSimpanan.map(i => i.id === parseInt(eid) ? obj : i);
+            else dataSimpanan.push(obj);
+
+            localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
+            cancelEdit();
+            muatTabel();
+        }
+
+        function muatTabel() {
+            const tabel = document.getElementById('isiTabel');
+            tabel.innerHTML = '';
+            const sorted = [...dataSimpanan].sort((a,b) => new Date(a.tgl) - new Date(b.tgl));
+            document.getElementById('emptyState').classList.toggle('hidden', sorted.length > 0);
+
+            sorted.forEach(d => {
+                const fTgl = new Date(d.tgl).toLocaleDateString('id-ID', { day:'numeric', month:'short' });
+                const isVendor = d.tipe === 'Vendor';
+                const badgeColor = isVendor ? 'text-purple-500' : 'text-blue-500';
+                
+                let infoNama = `<div class="font-bold text-gray-800 dark:text-gray-100">${d.nama}</div>`;
+                if(isVendor && d.namaKlien && d.namaKlien !== "-") {
+                    infoNama += `<div class="text-[9px] text-purple-400 italic">Klien: ${d.namaKlien}</div>`;
+                }
+
+                let row = `<tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-all group border-b border-gray-50 dark:border-gray-800">
+                    <td class="py-4 pr-2">
+                        <div class="font-black text-blue-600 text-[10px]">${fTgl}</div>
+                        <div class="text-[8px] text-gray-400 uppercase">${new Date(d.tgl).getFullYear()}</div>
+                    </td>
+                    <td class="py-4 pr-2">
+                        ${infoNama}
+                        <div class="text-[8px] font-black uppercase ${badgeColor}">${isVendor ? 'MUA' : 'PERSONAL'}</div>
+                    </td>
+                    <td class="py-4 pr-2">
+                        <span class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-[9px] font-bold text-gray-500 uppercase">${d.kat}</span>
+                    </td>`;
+
+                if(isAdmin) {
+                    row += `
+                        <td class="py-4 admin-field pr-2">
+                            <div class="font-bold text-[10px] text-gray-600 dark:text-gray-300 truncate max-w-[100px]">${d.lokasi || '-'}</div>
+                            <div class="text-[9px] text-green-600 font-bold">${d.wa || '-'}</div>
+                        </td>
+                        <td class="py-4 admin-field text-center">
+                            <div class="flex gap-1 justify-center">
+                                <a href="https://wa.me/${d.wa.replace(/\D/g,'')}" target="_blank" class="bg-green-500 p-1.5 rounded-lg text-white">📱</a>
+                                <button onclick="editData(${d.id})" class="bg-blue-500 p-1.5 rounded-lg text-white">✏️</button>
+                                <button onclick="hapusData(${d.id})" class="bg-red-500 p-1.5 rounded-lg text-white">🗑️</button>
+                            </div>
+                        </td>`;
+                }
+                row += `</tr>`;
+                tabel.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
+        async function sinkronSpreadsheet() {
+            const btn = document.getElementById('syncBtn');
+            const text = document.getElementById('syncText');
+            if (dataSimpanan.length === 0) return alert("Kosong!");
+
+            btn.disabled = true;
+            text.innerText = "⏳ Proses...";
+
+            try {
+                await fetch(URL_SPREADSHEET_ANDA, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dataSimpanan)
+                });
+                alert("✅ Berhasil Sinkron!");
+            } catch (error) {
+                alert("❌ Gagal!");
+            } finally {
+                btn.disabled = false;
+                text.innerText = "Sinkron Cloud ☁️";
+            }
+        }
+
+        function eksporExcel() {
+            if (dataSimpanan.length === 0) return alert("Kosong!");
+            const rows = dataSimpanan.map(d => ({
+                "Tanggal": d.tgl,
+                "Tipe": d.tipe,
+                "Nama Utama": d.nama,
+                "Klien MUA": d.namaKlien,
+                "Paket": d.kat,
+                "WhatsApp": d.wa,
+                "Lokasi": d.lokasi,
+                "Alamat/Catatan": d.alamat
+            }));
+            const ws = XLSX.utils.json_to_sheet(rows);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Agenda Nadzar");
+            XLSX.writeFile(wb, "Agenda_Nadzar.xlsx");
+        }
+
+        function editData(id) {
+            const item = dataSimpanan.find(i => i.id === id);
+            openApp(item.tipe);
+            document.getElementById('editId').value = item.id;
+            document.getElementById('inputNama').value = item.nama;
+            document.getElementById('inputTanggal').value = item.tgl;
+            document.getElementById('inputKontak').value = item.wa;
+            document.getElementById('inputLokasi').value = item.lokasi;
+            document.getElementById('inputAlamat').value = item.alamat;
+            document.getElementById('inputKategori').value = item.kat;
+            if(item.tipe === 'Vendor') document.getElementById('inputNamaKlien').value = item.namaKlien || "";
+            document.getElementById('btnSimpan').innerText = "Update Data";
+            document.getElementById('btnCancelEdit').classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelEdit() {
+            document.getElementById('editId').value = '';
+            ['inputNama', 'inputNamaKlien', 'inputTanggal', 'inputKontak', 'inputLokasi', 'inputAlamat'].forEach(i => document.getElementById(i).value = '');
+            document.getElementById('btnSimpan').innerText = "Simpan Data";
+            document.getElementById('btnCancelEdit').classList.add('hidden');
+        }
+
+        function hapusData(id) {
+            if(confirm("Hapus agenda ini?")) {
+                dataSimpanan = dataSimpanan.filter(i => i.id !== id);
+                localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
+                muatTabel();
+            }
+        }
+
+        document.getElementById('themeToggle').onclick = () => {
+            document.documentElement.classList.toggle('dark');
+            document.getElementById('themeToggle').innerText = document.documentElement.classList.contains('dark') ? '☀️' : '🌙';
+        };
+    </script>
+</body>
+</html>
