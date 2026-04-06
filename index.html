@@ -11,6 +11,7 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s; }
         .admin-field { display: none; }
         .is-admin .admin-field { display: table-cell; }
+        .is-admin #badgeMode { background-color: #EF4444; color: white; border: none; }
     </style>
 </head>
 <body id="mainBody" class="bg-[#F8FAFC] dark:bg-gray-900 text-gray-800 dark:text-gray-100 overflow-x-hidden text-sm">
@@ -42,11 +43,11 @@
     <div id="mainContent" class="hidden opacity-0 transition-opacity duration-700 container mx-auto p-4 md:p-10 max-w-7xl">
         <div class="flex justify-between items-start mb-10">
             <div>
-                <div id="badgeMode" class="bg-blue-100 text-blue-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block italic border border-blue-200">MODE: PRIBADI</div>
+                <div id="badgeMode" class="bg-blue-100 text-blue-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block italic border border-blue-200 transition-all">AKSES: MEMUAT...</div>
                 <h1 class="text-4xl font-extrabold text-[#2563EB]">Nadzar Photowork</h1>
             </div>
             <div class="flex gap-2">
-                <button onclick="toggleAdmin()" title="Akses Admin" class="w-12 h-12 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-md border border-gray-100 text-xl hover:bg-yellow-50">🔓</button>
+                <button onclick="toggleAdmin()" id="btnLock" title="Akses Admin" class="w-12 h-12 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-md border border-gray-100 text-xl hover:bg-yellow-50">🔓</button>
                 <button onclick="tarikDataCloud()" title="Refresh Data Cloud" class="w-12 h-12 flex items-center justify-center bg-orange-100 text-orange-600 rounded-full hover:rotate-180 transition-all shadow-md">☁️</button>
                 <button id="themeToggle" class="w-12 h-12 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-md">🌙</button>
             </div>
@@ -129,6 +130,7 @@
                     localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
                 }
             } catch (e) {
+                console.error("Gagal tarik:", e);
                 dataSimpanan = JSON.parse(localStorage.getItem('nadzarData')) || [];
             } finally { 
                 muatTabel();
@@ -138,7 +140,7 @@
 
         function openApp(mode) {
             currentMode = mode;
-            document.getElementById('badgeMode').innerText = "AKSES: " + mode;
+            updateBadge();
             const select = document.getElementById('inputKategori');
             const containerNamaKlien = document.getElementById('containerNamaKlien');
             
@@ -159,6 +161,19 @@
             tarikDataCloud();
         }
 
+        function updateBadge() {
+            const badge = document.getElementById('badgeMode');
+            if(isAdmin) {
+                badge.innerText = "AKSES: ADMIN";
+                badge.style.backgroundColor = "#EF4444";
+                badge.style.color = "white";
+            } else {
+                badge.innerText = "AKSES: " + currentMode;
+                badge.style.backgroundColor = "#DBEAFE";
+                badge.style.color = "#2563EB";
+            }
+        }
+
         async function toggleAdmin() {
             if(!isAdmin) {
                 const pass = prompt("Password Admin:");
@@ -167,8 +182,8 @@
                     document.getElementById('mainBody').classList.add('is-admin');
                     document.getElementById('eksporBtn').classList.remove('hidden');
                     document.getElementById('syncBtn').classList.remove('hidden');
-                    
-                    // LOGIN BERHASIL -> TARIK ULANG DAN REFRESH TABEL
+                    document.getElementById('btnLock').innerText = "🔒";
+                    updateBadge();
                     await tarikDataCloud(); 
                 } else if(pass !== null) { alert("Akses Ditolak!"); }
             } else {
@@ -176,6 +191,8 @@
                 document.getElementById('mainBody').classList.remove('is-admin');
                 document.getElementById('eksporBtn').classList.add('hidden');
                 document.getElementById('syncBtn').classList.add('hidden');
+                document.getElementById('btnLock').innerText = "🔓";
+                updateBadge();
                 muatTabel();
             }
         }
@@ -210,11 +227,11 @@
                     body: JSON.stringify(dataSimpanan)
                 });
                 localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
-                alert("✅ Berhasil!");
+                alert("✅ Berhasil Disimpan!");
                 cancelEdit();
                 muatTabel();
             } catch (e) { 
-                alert("⚠️ Gagal Sinkron Cloud, tapi tersimpan di memori."); 
+                alert("⚠️ Gagal Sinkron Cloud."); 
             } finally { 
                 loading.classList.add('hidden');
             }
@@ -223,16 +240,20 @@
         function muatTabel() {
             const tabel = document.getElementById('isiTabel');
             tabel.innerHTML = '';
+            
+            // Urutkan berdasarkan tanggal
             const sorted = [...dataSimpanan].sort((a,b) => new Date(a.tgl) - new Date(b.tgl));
             
             document.getElementById('emptyState').classList.toggle('hidden', sorted.length > 0);
-            if(sorted.length === 0) document.getElementById('emptyState').innerText = "Belum ada agenda";
 
             sorted.forEach(d => {
                 const fTgl = new Date(d.tgl).toLocaleDateString('id-ID', { day:'numeric', month:'short' });
                 const isVendor = d.tipe === 'Vendor';
+                
                 let infoNama = `<div class="font-bold text-gray-800 dark:text-gray-100 uppercase">${d.nama}</div>`;
-                if(isVendor && d.namaKlien !== "-") infoNama += `<div class="text-[9px] text-purple-500 font-black italic">USER: ${d.namaKlien}</div>`;
+                if(isVendor && d.namaKlien !== "-") {
+                    infoNama += `<div class="text-[9px] text-purple-500 font-black italic">USER: ${d.namaKlien}</div>`;
+                }
 
                 let row = `<tr class="border-b border-gray-50 dark:border-gray-800">
                     <td class="py-4 pr-2 font-black text-blue-600 uppercase text-[10px]">${fTgl}</td>
@@ -240,7 +261,7 @@
                     <td class="py-4 pr-2"><span class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-[8px] font-bold uppercase">${d.kat}</span></td>`;
                 
                 if(isAdmin) {
-                    row += `<td class="py-4 admin-field text-center">
+                    row += `<td class="py-4 text-center">
                         <div class="flex gap-1 justify-center">
                             <a href="https://wa.me/${d.wa.replace(/\D/g,'')}" target="_blank" class="bg-green-500 p-2 rounded-lg text-white">📱</a>
                             <button onclick="editData(${d.id})" class="bg-blue-500 p-2 rounded-lg text-white">✏️</button>
@@ -272,10 +293,15 @@
             document.getElementById('inputLokasi').value = item.lokasi;
             document.getElementById('inputAlamat').value = item.alamat;
             document.getElementById('inputKategori').value = item.kat;
+            
+            const containerNamaKlien = document.getElementById('containerNamaKlien');
             if(item.tipe === 'Vendor') {
-                document.getElementById('containerNamaKlien').classList.remove('hidden');
+                containerNamaKlien.classList.remove('hidden');
                 document.getElementById('inputNamaKlien').value = item.namaKlien;
+            } else {
+                containerNamaKlien.classList.add('hidden');
             }
+            
             document.getElementById('btnSimpan').innerText = "Simpan Perubahan";
             document.getElementById('btnCancelEdit').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -289,7 +315,7 @@
         }
 
         function hapusData(id) {
-            if(confirm("Hapus?")) {
+            if(confirm("Hapus agenda ini?")) {
                 dataSimpanan = dataSimpanan.filter(i => i.id != id);
                 localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
                 muatTabel();
