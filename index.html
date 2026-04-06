@@ -13,7 +13,6 @@
         .is-admin .admin-field { display: table-cell; }
         .is-admin #badgeMode { background-color: #EF4444 !important; color: white !important; }
         
-        /* Animasi Loading */
         .loader-ring {
             border: 3px solid rgba(37, 99, 235, 0.1);
             border-top: 3px solid #2563EB;
@@ -73,6 +72,13 @@
             <div class="lg:col-span-4 bg-white dark:bg-gray-800 p-6 md:p-8 rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-gray-700 h-fit">
                 <h2 id="formTitle" class="text-xl font-black mb-2 italic tracking-tight text-blue-600 uppercase">ISI DATA</h2>
                 
+                <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 mb-6 rounded-r-xl">
+                    <p class="text-[11px] leading-relaxed font-semibold text-blue-800 dark:text-blue-200">
+                        Harap melihat dulu <a href="#tabelBagian" class="underline decoration-2 decoration-blue-400 font-bold text-blue-600 dark:text-blue-400">agenda dibawah</a>, atau cek Agenda via 
+                        <a href="https://wa.me/6289685356850" target="_blank" class="underline decoration-2 decoration-green-400 font-bold text-green-600 dark:text-green-400">Whatsapp Nadzar</a>
+                    </p>
+                </div>
+
                 <div class="space-y-4">
                     <input type="hidden" id="editId">
                     <div>
@@ -104,7 +110,7 @@
                     <div>
                         <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Lokasi / Alamat</label>
                         <input type="text" id="inputLokasi" placeholder="Nama Lokasi Acara" class="w-full p-4 mt-1 mb-2 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm focus:border-blue-300">
-                        <textarea id="inputAlamat" placeholder="Alamat Lengkap / Catatan Tambahan" rows="2" class="w-full p-4 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm focus:border-blue-300"></textarea>
+                        <textarea id="inputAlamat" placeholder="Alamat Lengkap / Catatan" rows="2" class="w-full p-4 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm focus:border-blue-300"></textarea>
                     </div>
                     
                     <button onclick="simpanData()" id="btnSimpan" class="w-full bg-[#2563EB] text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition uppercase text-[10px] tracking-widest shadow-lg">Simpan ke Cloud</button>
@@ -145,14 +151,12 @@
     </div>
 
     <script>
-        // URL DEPLOY BARU
         const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbyTRQZqG09rILJgfwt7evuvnno_f3_ddDhnjmCoXCkVkGqZstoUIg4HDEvVE3DvcY55cQ/exec";
         
         let currentMode = "";
         let isAdmin = false;
         let dataSimpanan = [];
 
-        // Load data lokal awal
         try {
             const localData = localStorage.getItem('nadzarData');
             dataSimpanan = localData ? JSON.parse(localData) : [];
@@ -169,7 +173,7 @@
                     dataSimpanan = cloudData;
                     localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
                 }
-            } catch (e) { console.warn("Offline: Menggunakan data tersimpan."); }
+            } catch (e) { console.warn("Offline mode active."); }
 
             document.getElementById('selectionScreen').style.display = 'none';
             document.getElementById('mainContent').classList.remove('hidden');
@@ -222,7 +226,6 @@
                 return searchTxt.includes(keyword);
             });
 
-            // Urutkan berdasarkan tanggal terdekat
             const sorted = filtered.sort((a,b) => new Date(a.tgl || 0) - new Date(b.tgl || 0));
             document.getElementById('emptyState').classList.toggle('hidden', sorted.length > 0);
 
@@ -247,9 +250,9 @@
                     const waLink = noWA.startsWith('0') ? '62' + noWA.substring(1) : noWA;
                     row += `<td class="py-4 text-center align-top">
                         <div class="flex gap-1 justify-center">
-                            <a href="https://wa.me/${waLink}" target="_blank" title="Chat WA" class="bg-green-500 p-1.5 rounded-md text-white text-xs">📱</a>
-                            <button onclick="editData(${d.id})" title="Edit" class="bg-blue-500 p-1.5 rounded-md text-white text-xs">✏️</button>
-                            <button onclick="hapusData(${d.id})" title="Hapus" class="bg-red-500 p-1.5 rounded-md text-white text-xs">🗑️</button>
+                            <a href="https://wa.me/${waLink}" target="_blank" class="bg-green-500 p-1.5 rounded-md text-white text-xs">📱</a>
+                            <button onclick="editData(${d.id})" class="bg-blue-500 p-1.5 rounded-md text-white text-xs">✏️</button>
+                            <button onclick="hapusData(${d.id})" class="bg-red-500 p-1.5 rounded-md text-white text-xs">🗑️</button>
                         </div>
                     </td>`;
                 }
@@ -312,7 +315,7 @@
 
         async function simpanData() {
             const val = (id) => document.getElementById(id).value;
-            if(!val('inputNama') || !val('inputTanggal')) return alert("Wajib isi Nama & Tanggal!");
+            if(!val('inputNama') || !val('inputTanggal')) return alert("Isi Nama & Tanggal!");
             
             const loading = document.getElementById('loadingOverlay');
             loading.classList.remove('hidden');
@@ -370,11 +373,10 @@
         }
 
         function hapusData(id) {
-            if(confirm("Hapus agenda ini secara permanen?")) {
+            if(confirm("Hapus agenda ini?")) {
                 dataSimpanan = dataSimpanan.filter(i => i.id != id);
                 localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
                 muatTabel();
-                // Kirim perubahan hapus ke cloud
                 fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataSimpanan) });
             }
         }
@@ -383,7 +385,7 @@
             const ws = XLSX.utils.json_to_sheet(dataSimpanan);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Agenda");
-            XLSX.writeFile(wb, "Agenda_Nadzar_Photowork.xlsx");
+            XLSX.writeFile(wb, "Agenda_Nadzar.xlsx");
         }
 
         document.getElementById('themeToggle').onclick = () => {
