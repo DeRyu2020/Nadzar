@@ -13,6 +13,7 @@
         .is-admin .admin-field { display: table-cell; }
         .is-admin #badgeMode { background-color: #EF4444 !important; color: white !important; }
         
+        /* Animasi Loading */
         .loader-ring {
             border: 3px solid rgba(37, 99, 235, 0.1);
             border-top: 3px solid #2563EB;
@@ -96,11 +97,6 @@
                     </div>
 
                     <div>
-                        <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Jam Acara (WIB)</label>
-                        <input type="time" id="inputJam" class="w-full p-4 mt-1 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm focus:border-blue-300">
-                    </div>
-
-                    <div>
                         <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Kontak WhatsApp</label>
                         <input type="text" id="inputKontak" placeholder="08..." class="w-full p-4 mt-1 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm focus:border-blue-300">
                     </div>
@@ -108,7 +104,7 @@
                     <div>
                         <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Lokasi / Alamat</label>
                         <input type="text" id="inputLokasi" placeholder="Nama Lokasi Acara" class="w-full p-4 mt-1 mb-2 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm focus:border-blue-300">
-                        <textarea id="inputAlamat" placeholder="Alamat Lengkap" rows="2" class="w-full p-4 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm focus:border-blue-300"></textarea>
+                        <textarea id="inputAlamat" placeholder="Alamat Lengkap / Catatan Tambahan" rows="2" class="w-full p-4 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm focus:border-blue-300"></textarea>
                     </div>
                     
                     <button onclick="simpanData()" id="btnSimpan" class="w-full bg-[#2563EB] text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition uppercase text-[10px] tracking-widest shadow-lg">Simpan ke Cloud</button>
@@ -134,7 +130,7 @@
                     <table class="w-full text-left border-collapse" id="tabelUtama">
                         <thead>
                             <tr class="text-gray-400 border-b border-gray-50 dark:border-gray-700 text-[9px] uppercase font-bold tracking-widest">
-                                <th class="pb-4 pr-2">Waktu</th>
+                                <th class="pb-4 pr-2">Tanggal</th>
                                 <th class="pb-4 pr-2">Agenda</th>
                                 <th class="pb-4 pr-2">Paket</th>
                                 <th class="pb-4 admin-field text-center">Aksi</th>
@@ -149,12 +145,14 @@
     </div>
 
     <script>
-        const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbzDG6HMFG5nCzeElIbTl3cmqJNeln1wUTSHgOnjbB1T1UBQ77FZ2-V_RVqIeSjVgFZlwA/exec";
+        // URL DEPLOY BARU
+        const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbyTRQZqG09rILJgfwt7evuvnno_f3_ddDhnjmCoXCkVkGqZstoUIg4HDEvVE3DvcY55cQ/exec";
         
         let currentMode = "";
         let isAdmin = false;
         let dataSimpanan = [];
 
+        // Load data lokal awal
         try {
             const localData = localStorage.getItem('nadzarData');
             dataSimpanan = localData ? JSON.parse(localData) : [];
@@ -171,7 +169,7 @@
                     dataSimpanan = cloudData;
                     localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
                 }
-            } catch (e) { console.warn("Offline mode active."); }
+            } catch (e) { console.warn("Offline: Menggunakan data tersimpan."); }
 
             document.getElementById('selectionScreen').style.display = 'none';
             document.getElementById('mainContent').classList.remove('hidden');
@@ -224,33 +222,12 @@
                 return searchTxt.includes(keyword);
             });
 
-            // Sorting Tanggal & Jam
-            const sorted = filtered.sort((a,b) => {
-                const dtA = new Date((a.tgl || '1970-01-01') + 'T' + (a.jam || '00:00'));
-                const dtB = new Date((b.tgl || '1970-01-01') + 'T' + (b.jam || '00:00'));
-                return dtA - dtB;
-            });
-
+            // Urutkan berdasarkan tanggal terdekat
+            const sorted = filtered.sort((a,b) => new Date(a.tgl || 0) - new Date(b.tgl || 0));
             document.getElementById('emptyState').classList.toggle('hidden', sorted.length > 0);
 
             sorted.forEach(d => {
                 const fTgl = formatTanggalIndo(d.tgl);
-                
-                // --- CLEANER FORMAT JAM (Mencegah tampilan 1899-12-30...) ---
-                let fJam = "--:--";
-                if (d.jam) {
-                    let jamStr = d.jam.toString();
-                    if (jamStr.includes('T')) {
-                        // Memotong string ISO: Ambil bagian setelah 'T'
-                        let timePart = jamStr.split('T')[1];
-                        fJam = timePart.substring(0, 5); 
-                    } else {
-                        // Jika sudah format HH:mm
-                        fJam = jamStr.substring(0, 5);
-                    }
-                }
-                // -----------------------------------------------------------
-
                 const isVendor = d.tipe === 'Vendor';
                 let infoNama = `<div class="font-bold text-gray-800 dark:text-gray-100 uppercase leading-tight">${d.nama || 'No Name'}</div>
                                 <div class="text-[8px] opacity-40 font-bold uppercase truncate max-w-[150px]">${d.lokasi || '-'}</div>`;
@@ -261,10 +238,7 @@
                 }
 
                 let row = `<tr class="border-b border-gray-50 dark:border-gray-800 hover:bg-blue-50/30">
-                    <td class="py-4 pr-2 align-top">
-                        <div class="font-black text-blue-600 uppercase text-[9px] whitespace-nowrap">${fTgl}</div>
-                        <div class="text-[10px] font-bold text-gray-400 italic">${fJam} WIB</div>
-                    </td>
+                    <td class="py-4 pr-2 align-top font-black text-blue-600 uppercase text-[9px] whitespace-nowrap">${fTgl}</td>
                     <td class="py-4 pr-2">${infoNama}</td>
                     <td class="py-4 pr-2"><span class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-[8px] font-black uppercase">${d.kat || '-'}</span></td>`;
                 
@@ -273,9 +247,9 @@
                     const waLink = noWA.startsWith('0') ? '62' + noWA.substring(1) : noWA;
                     row += `<td class="py-4 text-center align-top">
                         <div class="flex gap-1 justify-center">
-                            <a href="https://wa.me/${waLink}" target="_blank" class="bg-green-500 p-1.5 rounded-md text-white text-xs">📱</a>
-                            <button onclick="editData(${d.id})" class="bg-blue-500 p-1.5 rounded-md text-white text-xs">✏️</button>
-                            <button onclick="hapusData(${d.id})" class="bg-red-500 p-1.5 rounded-md text-white text-xs">🗑️</button>
+                            <a href="https://wa.me/${waLink}" target="_blank" title="Chat WA" class="bg-green-500 p-1.5 rounded-md text-white text-xs">📱</a>
+                            <button onclick="editData(${d.id})" title="Edit" class="bg-blue-500 p-1.5 rounded-md text-white text-xs">✏️</button>
+                            <button onclick="hapusData(${d.id})" title="Hapus" class="bg-red-500 p-1.5 rounded-md text-white text-xs">🗑️</button>
                         </div>
                     </td>`;
                 }
@@ -338,7 +312,7 @@
 
         async function simpanData() {
             const val = (id) => document.getElementById(id).value;
-            if(!val('inputNama') || !val('inputTanggal')) return alert("Isi Nama & Tanggal!");
+            if(!val('inputNama') || !val('inputTanggal')) return alert("Wajib isi Nama & Tanggal!");
             
             const loading = document.getElementById('loadingOverlay');
             loading.classList.remove('hidden');
@@ -350,7 +324,6 @@
                 namaKlien: currentMode === 'Vendor' ? val('inputNamaKlien') : "-",
                 kat: val('inputKategori'), 
                 tgl: val('inputTanggal'),
-                jam: val('inputJam'),
                 wa: formatWA(val('inputKontak')),
                 lokasi: val('inputLokasi'), 
                 alamat: val('inputAlamat')
@@ -376,14 +349,6 @@
             document.getElementById('editId').value = item.id;
             document.getElementById('inputNama').value = item.nama || '';
             document.getElementById('inputTanggal').value = item.tgl || '';
-            
-            // Format jam untuk input time (HH:mm)
-            if(item.jam && item.jam.includes('T')) {
-                document.getElementById('inputJam').value = item.jam.split('T')[1].substring(0,5);
-            } else {
-                document.getElementById('inputJam').value = item.jam || '';
-            }
-
             document.getElementById('inputKontak').value = item.wa || '';
             document.getElementById('inputLokasi').value = item.lokasi || '';
             document.getElementById('inputAlamat').value = item.alamat || '';
@@ -400,15 +365,16 @@
         function cancelEdit() {
             document.getElementById('editId').value = '';
             document.getElementById('btnSimpan').innerText = "Simpan ke Cloud";
-            ['inputNama', 'inputNamaKlien', 'inputTanggal', 'inputJam', 'inputKontak', 'inputLokasi', 'inputAlamat'].forEach(i => document.getElementById(i).value = '');
+            ['inputNama', 'inputNamaKlien', 'inputTanggal', 'inputKontak', 'inputLokasi', 'inputAlamat'].forEach(i => document.getElementById(i).value = '');
             document.getElementById('btnCancelEdit').classList.add('hidden');
         }
 
         function hapusData(id) {
-            if(confirm("Hapus agenda ini?")) {
+            if(confirm("Hapus agenda ini secara permanen?")) {
                 dataSimpanan = dataSimpanan.filter(i => i.id != id);
                 localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
                 muatTabel();
+                // Kirim perubahan hapus ke cloud
                 fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataSimpanan) });
             }
         }
@@ -417,7 +383,7 @@
             const ws = XLSX.utils.json_to_sheet(dataSimpanan);
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Agenda");
-            XLSX.writeFile(wb, "Agenda_Nadzar.xlsx");
+            XLSX.writeFile(wb, "Agenda_Nadzar_Photowork.xlsx");
         }
 
         document.getElementById('themeToggle').onclick = () => {
