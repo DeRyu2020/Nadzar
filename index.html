@@ -113,9 +113,8 @@
         
         let currentMode = "";
         let isAdmin = false;
-        let dataSimpanan = []; // Kosongkan dulu agar tarik dari cloud
+        let dataSimpanan = [];
 
-        // FUNGSI UTAMA: TARIK DATA DARI CLOUD
         async function tarikDataCloud() {
             const loading = document.getElementById('loadingOverlay');
             loading.classList.remove('hidden');
@@ -128,7 +127,6 @@
                     muatTabel();
                 }
             } catch (e) {
-                // Jika cloud gagal, baru ambil dari lokal
                 dataSimpanan = JSON.parse(localStorage.getItem('nadzarData')) || [];
                 muatTabel();
             } finally { 
@@ -156,11 +154,11 @@
             document.getElementById('mainContent').classList.remove('hidden');
             setTimeout(() => document.getElementById('mainContent').classList.add('opacity-100'), 50);
             
-            // Saat menu dipilih, pastikan tarik data terbaru
             tarikDataCloud();
         }
 
-        function toggleAdmin() {
+        // PERBAIKAN DI SINI: TAMBAHKAN TARIK DATA SAAT LOGIN ADMIN
+        async function toggleAdmin() {
             if(!isAdmin) {
                 const pass = prompt("Password Admin:");
                 if(pass === "123456") {
@@ -168,23 +166,23 @@
                     document.getElementById('mainBody').classList.add('is-admin');
                     document.getElementById('eksporBtn').classList.remove('hidden');
                     document.getElementById('syncBtn').classList.remove('hidden');
+                    
+                    // LOGIN BERHASIL -> LANGSUNG LOADING TARIK DATA CLOUD LAGI
+                    await tarikDataCloud(); 
                 } else if(pass !== null) { alert("Akses Ditolak!"); }
             } else {
                 isAdmin = false;
                 document.getElementById('mainBody').classList.remove('is-admin');
                 document.getElementById('eksporBtn').classList.add('hidden');
                 document.getElementById('syncBtn').classList.add('hidden');
+                muatTabel();
             }
-            muatTabel();
         }
 
         async function simpanData() {
             const val = (id) => document.getElementById(id).value;
             if(!val('inputNama') || !val('inputTanggal')) return alert("Wajib isi Nama dan Tanggal!");
             
-            // Tarik data terbaru dulu dari cloud sebelum simpan agar ID tidak bentrok
-            await tarikDataCloud();
-
             const obj = {
                 id: document.getElementById('editId').value || Date.now(),
                 tipe: currentMode, 
@@ -205,7 +203,6 @@
             loading.classList.remove('hidden');
 
             try {
-                // Langsung hajar kirim ke cloud
                 await fetch(URL_SCRIPT, { 
                     method: 'POST', 
                     mode: 'no-cors', 
