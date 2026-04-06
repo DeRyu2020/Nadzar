@@ -120,7 +120,6 @@
         let isAdmin = false;
         let dataSimpanan = [];
 
-        // Inisialisasi awal data dengan aman
         try {
             const localData = localStorage.getItem('nadzarData');
             dataSimpanan = localData ? JSON.parse(localData) : [];
@@ -130,12 +129,10 @@
         }
 
         function openApp(mode) {
-            // 1. Tampilkan layar utama DULU agar tidak macet
             document.getElementById('selectionScreen').style.display = 'none';
             document.getElementById('mainContent').classList.remove('hidden');
             setTimeout(() => document.getElementById('mainContent').classList.add('opacity-100'), 50);
 
-            // 2. Set mode & UI
             currentMode = mode;
             updateBadge();
             
@@ -152,8 +149,24 @@
                 select.innerHTML = `<option value="Wedding">💍 Wedding</option><option value="Pre-Wed">📸 Pre-Wed</option><option value="Product">📦 Product</option><option value="Portrait">👤 Portrait</option>`;
             }
 
-            // 3. Muat tabel (bungkus try-catch agar jika gagal tidak bikin aplikasi blank)
             try { muatTabel(); } catch(e) { console.error("Gagal muat tabel:", e); }
+        }
+
+        function formatTanggalIndo(tglString) {
+            if(!tglString) return "-";
+            const d = new Date(tglString);
+            const tgl = String(d.getDate()).padStart(2, '0');
+            const bln = String(d.getMonth() + 1).padStart(2, '0');
+            const thn = d.getFullYear();
+            return `${tgl}-${bln}-${thn}`;
+        }
+
+        function formatWA(no) {
+            if(!no) return "";
+            let cleaned = no.toString().trim();
+            // Jika diawali angka 8, tambahkan 0
+            if(cleaned.startsWith('8')) return '0' + cleaned;
+            return cleaned;
         }
 
         function muatTabel() {
@@ -161,35 +174,32 @@
             if(!tabel) return;
             tabel.innerHTML = '';
             
-            // Pastikan dataSimpanan adalah Array sebelum diproses
             const dataValid = Array.isArray(dataSimpanan) ? dataSimpanan : [];
-            
-            const sorted = [...dataValid].sort((a,b) => {
-                return (new Date(a.tgl || 0)) - (new Date(b.tgl || 0));
-            });
+            const sorted = [...dataValid].sort((a,b) => (new Date(a.tgl || 0)) - (new Date(b.tgl || 0)));
 
             document.getElementById('emptyState').classList.toggle('hidden', sorted.length > 0);
 
             sorted.forEach(d => {
-                const tglObj = d.tgl ? new Date(d.tgl) : new Date();
-                const fTgl = tglObj.toLocaleDateString('id-ID', { day:'numeric', month:'short' });
+                const fTgl = formatTanggalIndo(d.tgl);
+                const noWA = formatWA(d.wa);
                 
                 const isVendor = d.tipe === 'Vendor';
                 let infoNama = `<div class="font-bold text-gray-800 dark:text-gray-100 uppercase">${d.nama || 'No Name'}</div>`;
                 if(isVendor && d.namaKlien && d.namaKlien !== "-") {
-                    infoNama += `<div class="text-[9px] text-purple-500 font-black italic">USER: ${d.namaKlien}</div>`;
+                    infoNama = `<div class="text-purple-600 dark:text-purple-400 font-extrabold uppercase text-[11px]">${d.namaKlien}</div>
+                                <div class="text-[8px] opacity-50 font-bold uppercase">MUA: ${d.nama}</div>`;
                 }
 
                 let row = `<tr class="border-b border-gray-50 dark:border-gray-800">
-                    <td class="py-4 pr-2 font-black text-blue-600 uppercase text-[10px]">${fTgl}</td>
-                    <td class="py-4 pr-2">${infoNama}<div class="text-[8px] font-bold uppercase opacity-30">${isVendor ? 'MUA' : 'KLIEN'}</div></td>
+                    <td class="py-4 pr-2 font-black text-blue-600 uppercase text-[9px] whitespace-nowrap">${fTgl}</td>
+                    <td class="py-4 pr-2">${infoNama}</td>
                     <td class="py-4 pr-2"><span class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-[8px] font-bold uppercase">${d.kat || '-'}</span></td>`;
                 
                 if(isAdmin) {
-                    const waBersih = (d.wa || "").toString().replace(/\D/g,'');
+                    const waLink = noWA.startsWith('0') ? '62' + noWA.substring(1) : noWA;
                     row += `<td class="py-4 text-center">
                         <div class="flex gap-1 justify-center">
-                            <a href="https://wa.me/${waBersih}" target="_blank" class="bg-green-500 p-2 rounded-lg text-white">📱</a>
+                            <a href="https://wa.me/${waLink}" target="_blank" class="bg-green-500 p-2 rounded-lg text-white">📱</a>
                             <button onclick="editData(${d.id})" class="bg-blue-500 p-2 rounded-lg text-white">✏️</button>
                             <button onclick="hapusData(${d.id})" class="bg-red-500 p-2 rounded-lg text-white">🗑️</button>
                         </div>
@@ -211,7 +221,7 @@
                     localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
                     muatTabel();
                     loading.classList.add('hidden');
-                    setTimeout(() => alert("✅ Cloud Terhubung!"), 100);
+                    setTimeout(() => alert("✅ Sinkron Cloud Berhasil!"), 100);
                 }
             } catch (e) {
                 loading.classList.add('hidden');
@@ -266,7 +276,7 @@
                 namaKlien: currentMode === 'Vendor' ? val('inputNamaKlien') : "-",
                 kat: val('inputKategori'), 
                 tgl: val('inputTanggal'),
-                wa: val('inputKontak'), 
+                wa: formatWA(val('inputKontak')), // Simpan dengan format 08...
                 lokasi: val('inputLokasi'), 
                 alamat: val('inputAlamat')
             };
@@ -278,10 +288,10 @@
             try {
                 await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataSimpanan) });
                 localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
-                alert("✅ Berhasil Disimpan!");
+                alert("✅ Tersimpan ke Cloud!");
                 cancelEdit();
                 muatTabel();
-            } catch (e) { alert("⚠️ Simpan Lokal Berhasil!"); }
+            } catch (e) { alert("⚠️ Tersimpan Lokal!"); }
             finally { loading.classList.add('hidden'); }
         }
 
@@ -290,7 +300,7 @@
             loading.classList.remove('hidden');
             try {
                 await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataSimpanan) });
-                alert("✅ Cloud Diupdate!");
+                alert("✅ Spreadsheet Diupdate!");
             } catch (e) { alert("❌ Gagal Sinkron!"); }
             finally { loading.classList.add('hidden'); }
         }
@@ -322,7 +332,7 @@
         }
 
         function hapusData(id) {
-            if(confirm("Hapus data?")) {
+            if(confirm("Hapus data ini?")) {
                 dataSimpanan = dataSimpanan.filter(i => i.id != id);
                 localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
                 muatTabel();
