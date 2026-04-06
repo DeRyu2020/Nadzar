@@ -119,7 +119,8 @@
             const loading = document.getElementById('loadingOverlay');
             loading.classList.remove('hidden');
             try {
-                const response = await fetch(URL_SCRIPT);
+                // Tambahkan parameter cache-busting agar browser tidak mengambil data lama
+                const response = await fetch(URL_SCRIPT + '?t=' + Date.now());
                 const cloudData = await response.json();
                 if(cloudData && Array.isArray(cloudData)) {
                     dataSimpanan = cloudData;
@@ -127,6 +128,7 @@
                     muatTabel();
                 }
             } catch (e) {
+                console.error("Gagal tarik data:", e);
                 dataSimpanan = JSON.parse(localStorage.getItem('nadzarData')) || [];
                 muatTabel();
             } finally { 
@@ -157,7 +159,6 @@
             tarikDataCloud();
         }
 
-        // PERBAIKAN DI SINI: TAMBAHKAN TARIK DATA SAAT LOGIN ADMIN
         async function toggleAdmin() {
             if(!isAdmin) {
                 const pass = prompt("Password Admin:");
@@ -166,8 +167,6 @@
                     document.getElementById('mainBody').classList.add('is-admin');
                     document.getElementById('eksporBtn').classList.remove('hidden');
                     document.getElementById('syncBtn').classList.remove('hidden');
-                    
-                    // LOGIN BERHASIL -> LANGSUNG LOADING TARIK DATA CLOUD LAGI
                     await tarikDataCloud(); 
                 } else if(pass !== null) { alert("Akses Ditolak!"); }
             } else {
@@ -183,9 +182,13 @@
             const val = (id) => document.getElementById(id).value;
             if(!val('inputNama') || !val('inputTanggal')) return alert("Wajib isi Nama dan Tanggal!");
             
+            const loading = document.getElementById('loadingOverlay');
+            loading.classList.remove('hidden');
+
+            // Buat objek data baru
             const obj = {
                 id: document.getElementById('editId').value || Date.now(),
-                tipe: currentMode, 
+                tipe: currentMode || 'Pribadi', 
                 nama: val('inputNama'),
                 namaKlien: currentMode === 'Vendor' ? val('inputNamaKlien') : "-",
                 kat: val('inputKategori'), 
@@ -195,25 +198,31 @@
                 alamat: val('inputAlamat')
             };
 
+            // Update memori lokal aplikasi
             const idx = dataSimpanan.findIndex(i => i.id == obj.id);
             if(idx > -1) dataSimpanan[idx] = obj;
             else dataSimpanan.push(obj);
 
-            const loading = document.getElementById('loadingOverlay');
-            loading.classList.remove('hidden');
-
             try {
+                // KIRIM KE CLOUD
+                // Gunakan timeout sederhana agar tidak menunggu terlalu lama
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 detik timeout
+
                 await fetch(URL_SCRIPT, { 
                     method: 'POST', 
-                    mode: 'no-cors', 
-                    body: JSON.stringify(dataSimpanan) 
+                    mode: 'no-cors', // Penting agar tidak kena CORS policy
+                    body: JSON.stringify(dataSimpanan),
+                    signal: controller.signal
                 });
+
                 localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
-                alert("✅ Berhasil! Data sudah masuk ke Agenda.");
+                alert("✅ Berhasil Disimpan!");
                 cancelEdit();
                 muatTabel();
             } catch (e) { 
-                alert("❌ Gagal kirim ke Cloud."); 
+                console.error("Kesalahan Cloud:", e);
+                alert("⚠️ Data tersimpan di HP, tapi sinkronisasi Cloud tertunda. Pastikan internet stabil."); 
             } finally { 
                 loading.classList.add('hidden');
             }
@@ -276,7 +285,7 @@
 
         function editData(id) {
             const item = dataSimpanan.find(i => i.id == id);
-            openApp(item.tipe);
+            // Jangan ganti mode secara paksa agar tidak bingung
             document.getElementById('editId').value = item.id;
             document.getElementById('inputNama').value = item.nama;
             document.getElementById('inputTanggal').value = item.tgl;
@@ -284,7 +293,15 @@
             document.getElementById('inputLokasi').value = item.lokasi;
             document.getElementById('inputAlamat').value = item.alamat;
             document.getElementById('inputKategori').value = item.kat;
-            if(item.tipe === 'Vendor') document.getElementById('inputNamaKlien').value = item.namaKlien;
+            
+            const containerNamaKlien = document.getElementById('containerNamaKlien');
+            if(item.tipe === 'Vendor') {
+                containerNamaKlien.classList.remove('hidden');
+                document.getElementById('inputNamaKlien').value = item.namaKlien;
+            } else {
+                containerNamaKlien.classList.add('hidden');
+            }
+
             document.getElementById('btnSimpan').innerText = "Simpan Perubahan";
             document.getElementById('btnCancelEdit').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
