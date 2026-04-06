@@ -8,7 +8,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s; scroll-behavior: smooth; }
         .admin-field { display: none; }
         .is-admin .admin-field { display: table-cell; }
         .is-admin #badgeMode { background-color: #EF4444 !important; color: white !important; }
@@ -54,7 +54,15 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div class="lg:col-span-4 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-gray-700 h-fit">
-                <h2 id="formTitle" class="text-2xl font-bold mb-6 italic tracking-tight text-blue-600 uppercase">ISI DATA</h2>
+                <h2 id="formTitle" class="text-2xl font-bold mb-2 italic tracking-tight text-blue-600 uppercase">ISI DATA</h2>
+                
+                <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 mb-6 rounded-r-xl">
+                    <p class="text-[11px] leading-relaxed font-semibold text-blue-800 dark:text-blue-200">
+                        Harap melihat dulu <a href="#tabelBagian" class="underline decoration-2 decoration-blue-400 font-bold text-blue-600 dark:text-blue-400">agenda dibawah</a>, atau cek Agenda via 
+                        <a href="https://wa.me/6289685356850" target="_blank" class="underline decoration-2 decoration-green-400 font-bold text-green-600 dark:text-green-400">Whatsapp Nadzar</a>, ini nomornya 089685356850
+                    </p>
+                </div>
+
                 <div class="space-y-4">
                     <input type="hidden" id="editId">
                     <label id="labelNama" class="text-[10px] font-bold uppercase ml-2 opacity-50">Nama Utama</label>
@@ -85,13 +93,21 @@
                 </div>
             </div>
 
-            <div class="lg:col-span-8 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div id="tabelBagian" class="lg:col-span-8 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
                 <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b pb-6 dark:border-gray-700">
                     <h2 class="text-2xl font-bold italic tracking-tight text-blue-600 uppercase">Agenda Nadzar</h2>
+                    
                     <div id="adminControls" class="hidden flex flex-wrap gap-2 justify-center">
-                        <button onclick="tarikDataCloud()" class="bg-orange-100 text-orange-600 px-4 py-2 rounded-xl text-[10px] font-bold uppercase shadow-sm hover:bg-orange-200 transition">Tarik Data Cloud ☁️</button>
-                        <button onclick="sinkronSpreadsheet()" id="syncBtn" class="bg-blue-100 text-blue-600 px-4 py-2 rounded-xl text-[10px] font-bold uppercase shadow-sm hover:bg-blue-200 transition">Update Cloud 🚀</button>
-                        <button onclick="eksporExcel()" class="bg-green-100 text-green-600 px-4 py-2 rounded-xl text-[10px] font-bold uppercase shadow-sm hover:bg-green-200 transition">Excel 📥</button>
+                        <div class="relative w-full md:w-auto mb-2 md:mb-0">
+                            <input type="text" id="searchBar" onkeyup="muatTabel()" placeholder="Cari nama/lokasi..." class="w-full md:w-64 p-3 pl-10 rounded-xl border border-gray-200 dark:bg-gray-700 text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500">
+                            <span class="absolute left-3 top-3 opacity-30">🔍</span>
+                        </div>
+                        
+                        <div class="flex flex-wrap gap-2 justify-center">
+                            <button onclick="tarikDataCloud()" class="bg-orange-100 text-orange-600 px-4 py-2 rounded-xl text-[10px] font-bold uppercase shadow-sm hover:bg-orange-200 transition">Tarik Cloud ☁️</button>
+                            <button onclick="sinkronSpreadsheet()" id="syncBtn" class="bg-blue-100 text-blue-600 px-4 py-2 rounded-xl text-[10px] font-bold uppercase shadow-sm hover:bg-blue-200 transition">Update Cloud 🚀</button>
+                            <button onclick="eksporExcel()" class="bg-green-100 text-green-600 px-4 py-2 rounded-xl text-[10px] font-bold uppercase shadow-sm hover:bg-green-200 transition">Excel 📥</button>
+                        </div>
                     </div>
                 </div>
                 
@@ -107,7 +123,7 @@
                         </thead>
                         <tbody id="isiTabel" class="divide-y divide-gray-50 dark:divide-gray-700 text-xs"></tbody>
                     </table>
-                    <div id="emptyState" class="py-20 text-center opacity-20 italic font-bold text-[10px] tracking-[0.3em] uppercase">Data Kosong / Belum Ditarik</div>
+                    <div id="emptyState" class="py-20 text-center opacity-20 italic font-bold text-[10px] tracking-[0.3em] uppercase">Data Kosong / Tidak Ditemukan</div>
                 </div>
             </div>
         </div>
@@ -125,25 +141,18 @@
             dataSimpanan = localData ? JSON.parse(localData) : [];
         } catch (e) { dataSimpanan = []; }
 
-        // FUNGSI UTAMA SAAT KLIK TOMBOL AWAL (DITAMBAH AUTO-SYNC)
         async function openApp(mode) {
-            // Tampilkan loading overlay
             const loading = document.getElementById('loadingOverlay');
             loading.classList.remove('hidden');
-
             try {
-                // Proses Sinkronisasi Cloud dulu sebelum masuk
                 const response = await fetch(URL_SCRIPT + '?t=' + Date.now());
                 const cloudData = await response.json();
                 if(cloudData && Array.isArray(cloudData)) {
                     dataSimpanan = cloudData;
                     localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
                 }
-            } catch (e) {
-                console.warn("Gagal sinkron awal, menggunakan data lokal.");
-            }
+            } catch (e) { console.warn("Pakai data lokal."); }
 
-            // Setelah beres sinkron (atau gagal), baru buka layar aplikasi
             document.getElementById('selectionScreen').style.display = 'none';
             document.getElementById('mainContent').classList.remove('hidden');
             setTimeout(() => document.getElementById('mainContent').classList.add('opacity-100'), 50);
@@ -151,10 +160,7 @@
             currentMode = mode;
             updateBadge();
             aturPilihanPaket(mode);
-            
             try { muatTabel(); } catch(e) {}
-            
-            // Hilangkan loading
             loading.classList.add('hidden');
         }
 
@@ -188,11 +194,19 @@
 
         function muatTabel() {
             const tabel = document.getElementById('isiTabel');
+            const keyword = document.getElementById('searchBar').value.toLowerCase();
             if(!tabel) return;
             tabel.innerHTML = '';
             
             const dataValid = Array.isArray(dataSimpanan) ? dataSimpanan : [];
-            const sorted = [...dataValid].sort((a,b) => (new Date(a.tgl || 0)) - (new Date(b.tgl || 0)));
+            
+            // FILTER BERDASARKAN KEYWORD PENCARIAN
+            const filtered = dataValid.filter(d => {
+                const searchString = `${d.nama} ${d.namaKlien} ${d.lokasi} ${d.kat}`.toLowerCase();
+                return searchString.includes(keyword);
+            });
+
+            const sorted = filtered.sort((a,b) => (new Date(a.tgl || 0)) - (new Date(b.tgl || 0)));
 
             document.getElementById('emptyState').classList.toggle('hidden', sorted.length > 0);
 
@@ -308,6 +322,16 @@
                 cancelEdit();
                 muatTabel();
             } catch (e) { alert("⚠️ Simpan Lokal!"); }
+            finally { loading.classList.add('hidden'); }
+        }
+
+        async function sinkronSpreadsheet() {
+            const loading = document.getElementById('loadingOverlay');
+            loading.classList.remove('hidden');
+            try {
+                await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataSimpanan) });
+                alert("✅ Cloud Diupdate!");
+            } catch (e) { alert("❌ Gagal Sinkron!"); }
             finally { loading.classList.add('hidden'); }
         }
 
