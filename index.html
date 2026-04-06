@@ -261,9 +261,9 @@
             });
         }
 
-        async function tarikDataCloud() {
+        async function tarikDataCloud(silent = false) {
             const loading = document.getElementById('loadingOverlay');
-            loading.classList.remove('hidden');
+            if(!silent) loading.classList.remove('hidden');
             try {
                 const response = await fetch(URL_SCRIPT + '?t=' + Date.now());
                 const cloudData = await response.json();
@@ -271,12 +271,18 @@
                     dataSimpanan = cloudData;
                     localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
                     muatTabel();
-                    loading.classList.add('hidden');
-                    setTimeout(() => alert("✅ Sinkron Selesai!"), 50);
+                    if(!silent) {
+                        loading.classList.add('hidden');
+                        setTimeout(() => alert("✅ Sinkron Selesai!"), 50);
+                    }
                 }
             } catch (e) {
+                if(!silent) {
+                    loading.classList.add('hidden');
+                    alert("❌ Gagal Sinkron!");
+                }
+            } finally {
                 loading.classList.add('hidden');
-                alert("❌ Gagal Sinkron!");
             }
         }
 
@@ -285,23 +291,29 @@
             if(!badge) return;
             if(isAdmin) {
                 badge.innerText = "AKSES: ADMIN";
-                badge.className = "bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block italic";
+                badge.className = "bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase mb-2 italic";
             } else {
                 badge.innerText = "AKSES: " + currentMode;
-                badge.className = "bg-blue-100 text-blue-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block italic border border-blue-200";
+                badge.className = "bg-blue-100 text-blue-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase mb-2 italic border border-blue-200";
             }
         }
 
-        function toggleAdmin() {
+        // PERBAIKAN: Fungsi async dan await tarikDataCloud
+        async function toggleAdmin() {
             if(!isAdmin) {
                 const pass = prompt("Password Admin:");
                 if(pass === "123456") {
                     isAdmin = true;
+                    // Munculkan overlay loading secara manual sebelum fetch
+                    document.getElementById('loadingOverlay').classList.remove('hidden');
+                    
                     document.getElementById('mainBody').classList.add('is-admin');
                     document.getElementById('adminControls').classList.remove('hidden');
                     document.getElementById('btnLock').innerText = "🔒";
                     updateBadge();
-                    muatTabel();
+                    
+                    // Tunggu tarik data cloud selesai
+                    await tarikDataCloud(true); 
                 } else if(pass !== null) { alert("Akses Ditolak!"); }
             } else {
                 isAdmin = false;
