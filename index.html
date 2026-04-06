@@ -13,7 +13,6 @@
         .is-admin .admin-field { display: table-cell; }
         .is-admin #badgeMode { background-color: #EF4444 !important; color: white !important; }
         
-        /* Animasi Spinner Kustom */
         .loader-ring {
             border: 3px solid rgba(37, 99, 235, 0.1);
             border-top: 3px solid #2563EB;
@@ -22,10 +21,7 @@
             height: 40px;
             animation: spin 0.8s linear infinite;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body id="mainBody" class="bg-[#F8FAFC] dark:bg-gray-900 text-gray-800 dark:text-gray-100 overflow-x-hidden text-sm">
@@ -33,9 +29,7 @@
     <div id="loadingOverlay" class="fixed inset-0 z-[100] bg-white/95 dark:bg-gray-900/95 flex items-center justify-center hidden backdrop-blur-sm">
         <div class="flex flex-col items-center">
             <div class="loader-ring mb-4"></div>
-            <h3 class="text-blue-600 dark:text-blue-400 font-extrabold tracking-[0.3em] text-[10px] uppercase animate-pulse">
-                Nadzar Cloud Syncing
-            </h3>
+            <h3 class="text-blue-600 dark:text-blue-400 font-extrabold tracking-[0.3em] text-[10px] uppercase animate-pulse">Nadzar Cloud Syncing</h3>
             <p class="text-gray-400 text-[8px] mt-1 font-medium italic">Menyinkronkan data agenda...</p>
         </div>
     </div>
@@ -76,7 +70,7 @@
                 <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 mb-6 rounded-r-xl">
                     <p class="text-[11px] leading-relaxed font-semibold text-blue-800 dark:text-blue-200">
                         Harap melihat dulu <a href="#tabelBagian" class="underline decoration-2 decoration-blue-400 font-bold text-blue-600 dark:text-blue-400">agenda dibawah</a>, atau cek Agenda via 
-                        <a href="https://wa.me/6289685356850" target="_blank" class="underline decoration-2 decoration-green-400 font-bold text-green-600 dark:text-green-400">Whatsapp Nadzar</a>, ini nomornya 089685356850
+                        <a href="https://wa.me/6289685356850" target="_blank" class="underline decoration-2 decoration-green-400 font-bold text-green-600 dark:text-green-400">Whatsapp Nadzar</a>
                     </p>
                 </div>
 
@@ -95,11 +89,12 @@
                     <div class="grid grid-cols-2 gap-2 text-xs font-bold">
                         <div>
                             <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Paket</label>
-                            <select id="inputKategori" class="w-full p-4 mt-1 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm cursor-pointer"></select>
+                            <select id="inputKategori" class="w-full p-4 mt-1 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm"></select>
                         </div>
                         <div>
-                            <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Tanggal</label>
-                            <input type="date" id="inputTanggal" class="w-full p-4 mt-1 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm">
+                            <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Tanggal & Jam</label>
+                            <input type="date" id="inputTanggal" class="w-full p-3 mt-1 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm">
+                            <input type="time" id="inputJam" class="w-full p-3 mt-1 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm">
                         </div>
                     </div>
 
@@ -125,19 +120,19 @@
                     
                     <div id="adminControls" class="hidden flex flex-wrap gap-2 justify-center w-full md:w-auto">
                         <div class="relative w-full md:w-auto">
-                            <input type="text" id="searchBar" onkeyup="muatTabel()" placeholder="Cari nama/lokasi..." class="w-full md:w-48 p-2 pl-8 rounded-lg border border-gray-200 dark:bg-gray-700 text-[10px] font-bold outline-none focus:ring-2 focus:ring-blue-500">
+                            <input type="text" id="searchBar" onkeyup="muatTabel()" placeholder="Cari..." class="w-full md:w-48 p-2 pl-8 rounded-lg border border-gray-200 dark:bg-gray-700 text-[10px] font-bold outline-none focus:ring-2 focus:ring-blue-500">
                             <span class="absolute left-2.5 top-2.5 opacity-30 text-[10px]">🔍</span>
                         </div>
-                        <button onclick="tarikDataCloud()" class="bg-orange-50 text-orange-600 px-3 py-2 rounded-lg text-[9px] font-bold uppercase shadow-sm hover:bg-orange-100">Sync ☁️</button>
-                        <button onclick="eksporExcel()" class="bg-green-50 text-green-600 px-3 py-2 rounded-lg text-[9px] font-bold uppercase shadow-sm hover:bg-green-100">Excel 📥</button>
+                        <button onclick="tarikDataCloud()" class="bg-orange-50 text-orange-600 px-3 py-2 rounded-lg text-[9px] font-bold uppercase hover:bg-orange-100">Sync ☁️</button>
+                        <button onclick="eksporExcel()" class="bg-green-50 text-green-600 px-3 py-2 rounded-lg text-[9px] font-bold uppercase hover:bg-green-100">Excel 📥</button>
                     </div>
                 </div>
                 
                 <div class="overflow-x-auto min-h-[300px]">
-                    <table class="w-full text-left border-collapse" id="tabelUtama">
+                    <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="text-gray-400 border-b border-gray-50 dark:border-gray-700 text-[9px] uppercase font-bold tracking-widest">
-                                <th class="pb-4 pr-2">Tgl</th>
+                                <th class="pb-4 pr-2">Jadwal</th>
                                 <th class="pb-4 pr-2">Agenda</th>
                                 <th class="pb-4 pr-2">Paket</th>
                                 <th class="pb-4 admin-field text-center">Aksi</th>
@@ -153,21 +148,16 @@
 
     <script>
         const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwQbnJoZuF9CaOP6ul2eee_J-TCt04dLI6CFLcpNvTSOO73z8sgGpVhwvCyrjYGBX5L-g/exec";
-        
-        let currentMode = "";
-        let isAdmin = false;
-        let dataSimpanan = [];
+        let currentMode = ""; let isAdmin = false; let dataSimpanan = [];
 
         try {
             const localData = localStorage.getItem('nadzarData');
             dataSimpanan = localData ? JSON.parse(localData) : [];
         } catch (e) { dataSimpanan = []; }
 
-        // AUTO SYNC SAAT PILIH MENU
         async function openApp(mode) {
             const loading = document.getElementById('loadingOverlay');
             loading.classList.remove('hidden');
-            
             try {
                 const response = await fetch(URL_SCRIPT + '?t=' + Date.now());
                 const cloudData = await response.json();
@@ -175,12 +165,10 @@
                     dataSimpanan = cloudData;
                     localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
                 }
-            } catch (e) { console.warn("Menggunakan data offline."); }
-
+            } catch (e) { console.warn("Offline."); }
             document.getElementById('selectionScreen').style.display = 'none';
             document.getElementById('mainContent').classList.remove('hidden');
             setTimeout(() => document.getElementById('mainContent').classList.add('opacity-100'), 50);
-
             currentMode = mode;
             updateBadge();
             aturPilihanPaket(mode);
@@ -209,30 +197,19 @@
             return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
         }
 
-        function formatWA(no) {
-            if(!no) return "";
-            let cleaned = no.toString().trim();
-            if(cleaned.startsWith('8')) return '0' + cleaned;
-            return cleaned;
-        }
-
         function muatTabel() {
             const tabel = document.getElementById('isiTabel');
             const keyword = document.getElementById('searchBar').value.toLowerCase();
             if(!tabel) return;
             tabel.innerHTML = '';
             
-            const dataValid = Array.isArray(dataSimpanan) ? dataSimpanan : [];
-            const filtered = dataValid.filter(d => {
-                const searchTxt = `${d.nama} ${d.namaKlien} ${d.lokasi} ${d.kat}`.toLowerCase();
-                return searchTxt.includes(keyword);
-            });
-
+            const filtered = dataSimpanan.filter(d => `${d.nama} ${d.namaKlien} ${d.lokasi} ${d.kat}`.toLowerCase().includes(keyword));
             const sorted = filtered.sort((a,b) => (new Date(a.tgl || 0)) - (new Date(b.tgl || 0)));
             document.getElementById('emptyState').classList.toggle('hidden', sorted.length > 0);
 
             sorted.forEach(d => {
                 const fTgl = formatTanggalIndo(d.tgl);
+                const jam = d.jam || "--:--";
                 const isVendor = d.tipe === 'Vendor';
                 let infoNama = `<div class="font-bold text-gray-800 dark:text-gray-100 uppercase leading-tight">${d.nama || 'No Name'}</div>
                                 <div class="text-[8px] opacity-40 font-bold uppercase truncate max-w-[150px]">${d.lokasi || '-'}</div>`;
@@ -243,13 +220,15 @@
                 }
 
                 let row = `<tr class="border-b border-gray-50 dark:border-gray-800 hover:bg-blue-50/30">
-                    <td class="py-4 pr-2 font-black text-blue-600 uppercase text-[9px] whitespace-nowrap align-top">${fTgl}</td>
+                    <td class="py-4 pr-2 align-top">
+                        <div class="font-black text-blue-600 uppercase text-[9px]">${fTgl}</div>
+                        <div class="text-[9px] font-bold text-blue-400 mt-0.5">⏰ ${jam} WIB</div>
+                    </td>
                     <td class="py-4 pr-2">${infoNama}</td>
                     <td class="py-4 pr-2"><span class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-[8px] font-black uppercase">${d.kat || '-'}</span></td>`;
                 
                 if(isAdmin) {
-                    const noWA = formatWA(d.wa);
-                    const waLink = noWA.startsWith('0') ? '62' + noWA.substring(1) : noWA;
+                    const waLink = d.wa && d.wa.startsWith('0') ? '62' + d.wa.substring(1) : d.wa;
                     row += `<td class="py-4 text-center align-top">
                         <div class="flex gap-1 justify-center">
                             <a href="https://wa.me/${waLink}" target="_blank" class="bg-green-500 p-1.5 rounded-md text-white text-xs">📱</a>
@@ -263,75 +242,19 @@
             });
         }
 
-        async function tarikDataCloud() {
-            const loading = document.getElementById('loadingOverlay');
-            loading.classList.remove('hidden');
-            try {
-                const response = await fetch(URL_SCRIPT + '?t=' + Date.now());
-                const cloudData = await response.json();
-                if(cloudData && Array.isArray(cloudData)) {
-                    dataSimpanan = cloudData;
-                    localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
-                    muatTabel();
-                    loading.classList.add('hidden');
-                    setTimeout(() => alert("✅ Sinkron Selesai!"), 50);
-                }
-            } catch (e) {
-                loading.classList.add('hidden');
-                alert("❌ Gagal Sinkron!");
-            }
-        }
-
-        function updateBadge() {
-            const badge = document.getElementById('badgeMode');
-            if(!badge) return;
-            if(isAdmin) {
-                badge.innerText = "AKSES: ADMIN";
-                badge.className = "bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block italic";
-            } else {
-                badge.innerText = "AKSES: " + currentMode;
-                badge.className = "bg-blue-100 text-blue-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block italic border border-blue-200";
-            }
-        }
-
-        function toggleAdmin() {
-            if(!isAdmin) {
-                const pass = prompt("Password Admin:");
-                if(pass === "123456") {
-                    isAdmin = true;
-                    document.getElementById('mainBody').classList.add('is-admin');
-                    document.getElementById('adminControls').classList.remove('hidden');
-                    document.getElementById('btnLock').innerText = "🔒";
-                    updateBadge();
-                    muatTabel();
-                } else if(pass !== null) { alert("Akses Ditolak!"); }
-            } else {
-                isAdmin = false;
-                document.getElementById('mainBody').classList.remove('is-admin');
-                document.getElementById('adminControls').classList.add('hidden');
-                document.getElementById('btnLock').innerText = "🔓";
-                updateBadge();
-                muatTabel();
-            }
-        }
-
         async function simpanData() {
             const val = (id) => document.getElementById(id).value;
-            if(!val('inputNama') || !val('inputTanggal')) return alert("Wajib isi Nama & Tanggal!");
-            
+            if(!val('inputNama') || !val('inputTanggal')) return alert("Isi Nama & Tanggal!");
             const loading = document.getElementById('loadingOverlay');
             loading.classList.remove('hidden');
 
             const obj = {
                 id: document.getElementById('editId').value || Date.now(),
-                tipe: currentMode || 'Pribadi', 
-                nama: val('inputNama'),
+                tipe: currentMode, nama: val('inputNama'),
                 namaKlien: currentMode === 'Vendor' ? val('inputNamaKlien') : "-",
-                kat: val('inputKategori'), 
-                tgl: val('inputTanggal'),
-                wa: formatWA(val('inputKontak')),
-                lokasi: val('inputLokasi'), 
-                alamat: val('inputAlamat')
+                kat: val('inputKategori'), tgl: val('inputTanggal'),
+                jam: val('inputJam'), wa: val('inputKontak'),
+                lokasi: val('inputLokasi'), alamat: val('inputAlamat')
             };
 
             const idx = dataSimpanan.findIndex(i => i.id == obj.id);
@@ -341,10 +264,9 @@
             try {
                 await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataSimpanan) });
                 localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
-                alert("✅ Terkirim ke Cloud!");
-                cancelEdit();
-                muatTabel();
-            } catch (e) { alert("⚠️ Simpan Offline!"); }
+                alert("✅ Terkirim!");
+                cancelEdit(); muatTabel();
+            } catch (e) { alert("⚠️ Offline!"); }
             finally { loading.classList.add('hidden'); }
         }
 
@@ -352,15 +274,16 @@
             const item = dataSimpanan.find(i => i.id == id);
             if(!item) return;
             document.getElementById('editId').value = item.id;
-            document.getElementById('inputNama').value = item.nama || '';
-            document.getElementById('inputTanggal').value = item.tgl || '';
+            document.getElementById('inputNama').value = item.nama;
+            document.getElementById('inputTanggal').value = item.tgl;
+            document.getElementById('inputJam').value = item.jam || '';
             document.getElementById('inputKontak').value = item.wa || '';
             document.getElementById('inputLokasi').value = item.lokasi || '';
             document.getElementById('inputAlamat').value = item.alamat || '';
-            document.getElementById('inputKategori').value = item.kat || '';
+            document.getElementById('inputKategori').value = item.kat;
             if(item.tipe === 'Vendor') {
                 document.getElementById('containerNamaKlien').classList.remove('hidden');
-                document.getElementById('inputNamaKlien').value = item.namaKlien || '';
+                document.getElementById('inputNamaKlien').value = item.namaKlien;
             }
             document.getElementById('btnSimpan').innerText = "Update Data";
             document.getElementById('btnCancelEdit').classList.remove('hidden');
@@ -370,28 +293,47 @@
         function cancelEdit() {
             document.getElementById('editId').value = '';
             document.getElementById('btnSimpan').innerText = "Simpan ke Cloud";
-            ['inputNama', 'inputNamaKlien', 'inputTanggal', 'inputKontak', 'inputLokasi', 'inputAlamat'].forEach(i => document.getElementById(i).value = '');
+            ['inputNama', 'inputNamaKlien', 'inputTanggal', 'inputJam', 'inputKontak', 'inputLokasi', 'inputAlamat'].forEach(i => document.getElementById(i).value = '');
             document.getElementById('btnCancelEdit').classList.add('hidden');
         }
 
-        function hapusData(id) {
-            if(confirm("Hapus data agenda ini?")) {
-                dataSimpanan = dataSimpanan.filter(i => i.id != id);
-                localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
-                muatTabel();
+        function toggleAdmin() {
+            if(!isAdmin) {
+                if(prompt("Password Admin:") === "123456") {
+                    isAdmin = true;
+                    document.getElementById('mainBody').classList.add('is-admin');
+                    document.getElementById('adminControls').classList.remove('hidden');
+                    document.getElementById('btnLock').innerText = "🔒";
+                    updateBadge(); muatTabel();
+                }
+            } else {
+                isAdmin = false;
+                document.getElementById('mainBody').classList.remove('is-admin');
+                document.getElementById('adminControls').classList.add('hidden');
+                document.getElementById('btnLock').innerText = "🔓";
+                updateBadge(); muatTabel();
             }
         }
 
-        function eksporExcel() {
-            const ws = XLSX.utils.json_to_sheet(dataSimpanan);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Agenda");
-            XLSX.writeFile(wb, "Agenda_Nadzar.xlsx");
+        async function tarikDataCloud() {
+            const loading = document.getElementById('loadingOverlay');
+            loading.classList.remove('hidden');
+            try {
+                const response = await fetch(URL_SCRIPT + '?t=' + Date.now());
+                const cloudData = await response.json();
+                if(cloudData) { dataSimpanan = cloudData; localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan)); muatTabel(); }
+            } finally { loading.classList.add('hidden'); }
         }
 
-        document.getElementById('themeToggle').onclick = () => {
-            document.documentElement.classList.toggle('dark');
-        };
+        function updateBadge() {
+            const b = document.getElementById('badgeMode');
+            if(isAdmin) { b.innerText = "AKSES: ADMIN"; b.className = "bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block"; }
+            else { b.innerText = "AKSES: " + currentMode; b.className = "bg-blue-100 text-blue-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block italic border border-blue-200"; }
+        }
+
+        function hapusData(id) { if(confirm("Hapus?")) { dataSimpanan = dataSimpanan.filter(i => i.id != id); muatTabel(); } }
+        function eksporExcel() { const ws = XLSX.utils.json_to_sheet(dataSimpanan); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Agenda"); XLSX.writeFile(wb, "Agenda.xlsx"); }
+        document.getElementById('themeToggle').onclick = () => document.documentElement.classList.toggle('dark');
     </script>
 </body>
 </html>
