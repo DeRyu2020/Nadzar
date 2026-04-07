@@ -226,6 +226,7 @@
                 return searchTxt.includes(keyword);
             });
 
+            // Sorting untuk tampilan tabel browser
             const sorted = filtered.sort((a,b) => new Date(a.tgl || 0) - new Date(b.tgl || 0));
             document.getElementById('emptyState').classList.toggle('hidden', sorted.length > 0);
 
@@ -320,6 +321,7 @@
             }
         }
 
+        // PERBAIKAN: Sorting data sebelum dikirim ke Cloud
         async function simpanData() {
             const val = (id) => document.getElementById(id).value;
             if(!val('inputNama') || !val('inputTanggal')) return alert("Isi Nama & Tanggal!");
@@ -343,17 +345,23 @@
             if(idx > -1) dataSimpanan[idx] = obj;
             else dataSimpanan.push(obj);
 
+            // LOGIKA SORTING: Urutkan data berdasarkan tanggal sebelum simpan ke Cloud
+            dataSimpanan.sort((a, b) => new Date(a.tgl || 0) - new Date(b.tgl || 0));
+
             try {
-                await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataSimpanan) });
+                await fetch(URL_SCRIPT, { 
+                    method: 'POST', 
+                    mode: 'no-cors', 
+                    body: JSON.stringify(dataSimpanan) 
+                });
                 localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
-                alert("✅ Cloud Updated!");
+                alert("✅ Cloud Updated & Sorted!");
                 cancelEdit();
                 muatTabel();
             } catch (e) { alert("⚠️ Terkirim Offline!"); }
             finally { loading.classList.add('hidden'); }
         }
 
-        // PERBAIKAN: Fungsi EditData dengan Format Tanggal Otomatis
         function editData(id) {
             const item = dataSimpanan.find(i => i.id == id);
             if(!item) return;
@@ -361,12 +369,13 @@
             document.getElementById('editId').value = item.id;
             document.getElementById('inputNama').value = item.nama || '';
             
-            // Konversi tanggal ke format YYYY-MM-DD (Wajib untuk input tipe date)
             if (item.tgl) {
                 const dateObj = new Date(item.tgl);
                 if (!isNaN(dateObj.getTime())) {
-                    const formattedDate = dateObj.toISOString().split('T')[0];
-                    document.getElementById('inputTanggal').value = formattedDate;
+                    const y = dateObj.getFullYear();
+                    const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+                    const d = String(dateObj.getDate()).padStart(2, '0');
+                    document.getElementById('inputTanggal').value = `${y}-${m}-${d}`;
                 } else {
                     document.getElementById('inputTanggal').value = item.tgl;
                 }
@@ -399,6 +408,9 @@
         function hapusData(id) {
             if(confirm("Hapus agenda ini?")) {
                 dataSimpanan = dataSimpanan.filter(i => i.id != id);
+                // Pastikan tetap terurut setelah dihapus
+                dataSimpanan.sort((a, b) => new Date(a.tgl || 0) - new Date(b.tgl || 0));
+                
                 localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
                 muatTabel();
                 fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataSimpanan) });
