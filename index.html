@@ -105,16 +105,14 @@
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div class="lg:col-span-4 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border border-gray-50 dark:border-gray-700 h-fit">
+            <div id="formSection" class="lg:col-span-4 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border border-gray-50 dark:border-gray-700 h-fit">
                 <h2 id="formTitle" class="text-xl font-black mb-1 italic tracking-tight text-blue-600 uppercase">ISI DATA</h2>
-                
                 <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-2 mb-6 leading-relaxed">
                     Sebelum mengisi harap 
                     <span onclick="document.getElementById('tabelBagian').scrollIntoView({behavior:'smooth'})" class="text-blue-600 dark:text-blue-400 font-bold cursor-pointer hover:underline decoration-2 underline-offset-4">Lihat Agenda</span> 
                     atau 
                     <a href="https://wa.me/6289685356850" target="_blank" class="text-green-600 dark:text-green-400 font-bold hover:underline decoration-2 underline-offset-4">Hubungi Nadzar</a>
                 </p>
-
                 <div class="space-y-4 mt-6 border-t border-gray-50 dark:border-gray-700 pt-6">
                     <input type="hidden" id="editId">
                     <div>
@@ -148,12 +146,10 @@
                         <input type="text" id="inputLokasi" placeholder="Nama Lokasi" class="w-full p-4 mt-1 mb-2 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none">
                         <textarea id="inputAlamat" placeholder="Detail Alamat" rows="2" class="w-full p-4 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none"></textarea>
                     </div>
-
                     <div id="fieldRekanan">
-                        <label class="text-[10px] font-bold uppercase ml-2 text-orange-600">Rekanan / Fotografer (Handler)</label>
+                        <label class="text-[10px] font-bold uppercase ml-2 text-orange-600">Rekanan / Fotografer (Handled)</label>
                         <input type="text" id="inputRekanan" placeholder="Siapa yang handle job ini?" class="w-full p-4 mt-1 rounded-2xl border border-orange-100 dark:bg-gray-700 dark:border-orange-900/30 outline-none font-bold focus:border-orange-400">
                     </div>
-
                     <button onclick="simpanData()" id="btnSimpan" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition uppercase text-[10px] tracking-widest shadow-lg shadow-blue-200 dark:shadow-none">Simpan Agenda</button>
                     <button onclick="cancelEdit()" id="btnCancelEdit" class="hidden w-full text-gray-400 font-bold py-2 text-[10px] uppercase">Batal Ubah</button>
                 </div>
@@ -175,7 +171,7 @@
                             <tr class="text-gray-400 border-b border-gray-50 dark:border-gray-800 text-[9px] uppercase font-black tracking-[0.2em]">
                                 <th class="pb-4">Waktu</th>
                                 <th class="pb-4">Klien / Lokasi</th>
-                                <th class="pb-4">Paket</th>
+                                <th id="thHandled" class="pb-4" style="display:none">Handled</th>
                                 <th class="pb-4 text-center op-col" style="display:none">Opsi</th>
                             </tr>
                         </thead>
@@ -213,6 +209,7 @@
             const todayStr = now.toISOString().split('T')[0];
             const todayTs = new Date(todayStr).getTime();
 
+            // Statistik Bulanan
             const bulanIni = dataSimpanan.filter(d => {
                 if(!d.tgl) return false;
                 const dt = new Date(d.tgl);
@@ -221,6 +218,7 @@
             document.getElementById('statTotal').innerText = bulanIni.length;
             document.getElementById('statVendor').innerText = bulanIni.filter(d => d.tipe === 'Vendor').length;
 
+            // Agenda Hari Ini & Mendatang
             const allSorted = dataSimpanan.filter(d => d.tgl).sort((a,b) => new Date(a.tgl) - new Date(b.tgl));
             const jobsHariIni = allSorted.filter(d => d.tgl === todayStr);
             const jobsMendatang = allSorted.filter(d => new Date(d.tgl).getTime() > todayTs);
@@ -249,6 +247,7 @@
                 document.getElementById('cdNama').innerText = "Agenda Kosong";
             }
 
+            // Perbaikan Logika Jadwal Selanjutnya (Next Schedule Box)
             const box = document.getElementById('nextScheduleBox');
             if(jobsHariIni.length > 0 && jobsMendatang.length > 0) {
                 box.classList.remove('hidden');
@@ -273,6 +272,8 @@
             const sorted = filtered.sort((a,b) => new Date(a.tgl || 0) - new Date(b.tgl || 0));
             document.getElementById('emptyState').classList.toggle('hidden', sorted.length > 0);
 
+            // Tampilkan header handled hanya untuk admin
+            document.getElementById('thHandled').style.display = isAdmin ? 'table-cell' : 'none';
             document.querySelectorAll('.op-col').forEach(el => el.style.display = isAdmin ? 'table-cell' : 'none');
 
             sorted.forEach(d => {
@@ -280,20 +281,40 @@
                 let infoNama = `<div class="font-black text-gray-800 dark:text-white uppercase text-sm">${d.nama}</div>`;
                 if(isVendor && d.namaKlien !== "-") infoNama = `<div class="text-purple-600 font-extrabold uppercase text-sm">${d.namaKlien}</div><div class="text-[9px] opacity-40 uppercase font-bold">Oleh MUA: ${d.nama}</div>`;
 
+                // Layout baris (Disisipkan kolom handled hanya jika Admin)
                 let row = `<tr class="flex flex-col md:table-row bg-gray-50/50 dark:bg-gray-700/20 md:bg-transparent rounded-2xl p-4 md:p-0 md:border-b border-gray-50 dark:border-gray-800 hover:bg-blue-50/20 transition-colors">
                     <td class="md:py-5 md:pr-2 mb-2 md:mb-0">
-                        <span class="md:hidden text-[8px] font-bold opacity-30 block uppercase tracking-widest">Waktu</span>
-                        <div class="font-black text-blue-600 uppercase text-[10px]">${formatTanggalIndo(d.tgl)}</div>
-                        <div class="text-[9px] font-bold text-gray-400 italic">${d.jam || '-'}</div>
+                        <div class="grid grid-cols-2 md:block">
+                            <div>
+                                <span class="md:hidden text-[8px] font-bold opacity-30 block uppercase tracking-widest">Waktu</span>
+                                <div class="font-black text-blue-600 uppercase text-[10px]">${formatTanggalIndo(d.tgl)}</div>
+                                <div class="text-[9px] font-bold text-gray-400 italic">${d.jam || '-'}</div>
+                            </div>
+                            <div class="md:hidden ${isAdmin ? '' : 'hidden'}">
+                                <span class="text-[8px] font-bold opacity-30 block uppercase tracking-widest">Handled</span>
+                                <div class="text-orange-600 font-black uppercase text-[10px]">${d.rekanan || '-'}</div>
+                            </div>
+                        </div>
                     </td>
                     <td class="md:py-5 md:pr-2 mb-2 md:mb-0">
                         <span class="md:hidden text-[8px] font-bold opacity-30 block uppercase tracking-widest">Klien & Lokasi</span>
                         ${infoNama}
                         <div class="text-[9px] opacity-50 uppercase truncate max-w-[200px] mt-0.5">${d.lokasi || '-'}</div>
-                    </td>
-                    <td class="md:py-5 md:pr-2 mb-4 md:mb-0">
-                        <span class="md:hidden text-[8px] font-bold opacity-30 block uppercase tracking-widest">Paket</span>
-                        <span class="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full text-[8px] font-black uppercase text-gray-600 dark:text-gray-300 inline-block mt-1">${d.kat || '-'}</span>
+                        <div class="md:hidden flex gap-2 items-center mt-1">
+                             <span class="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-full text-[8px] font-black uppercase text-gray-600 dark:text-gray-300 inline-block">${d.kat || '-'}</span>
+                        </div>
+                    </td>`;
+
+                // Kolom Handled (Desktop) - Hanya Admin
+                if(isAdmin) {
+                    row += `<td class="hidden md:table-cell md:py-5 md:pr-2">
+                         <div class="text-orange-600 font-black uppercase text-[10px]">${d.rekanan || '-'}</div>
+                    </td>`;
+                }
+
+                // Kolom Paket (Desktop)
+                row += `<td class="hidden md:table-cell md:py-5 md:pr-2">
+                        <span class="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full text-[8px] font-black uppercase text-gray-600 dark:text-gray-300 inline-block">${d.kat || '-'}</span>
                     </td>`;
                 
                 if(isAdmin) {
@@ -358,6 +379,8 @@
         function aturPilihanPaket(mode) {
             const select = document.getElementById('inputKategori');
             const containerNamaKlien = document.getElementById('containerNamaKlien');
+            document.getElementById('fieldRekanan').style.display = isAdmin ? 'block' : 'none';
+
             if(mode === 'Vendor') {
                 document.getElementById('labelNama').innerText = "Nama MUA / Salon";
                 containerNamaKlien.classList.remove('hidden');
@@ -397,7 +420,7 @@
             currentMode = item.tipe || 'Pribadi';
             aturPilihanPaket(currentMode);
             updateBadge();
-            document.getElementById('fieldRekanan').style.display = 'block';
+            document.getElementById('fieldRekanan').style.display = isAdmin ? 'block' : 'none';
             document.getElementById('editId').value = item.id;
             document.getElementById('inputNama').value = item.nama;
             document.getElementById('inputJam').value = item.jam;
@@ -410,7 +433,7 @@
             if(currentMode === 'Vendor') document.getElementById('inputNamaKlien').value = item.namaKlien;
             document.getElementById('btnSimpan').innerText = "Update Agenda";
             document.getElementById('btnCancelEdit').classList.remove('hidden');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            document.getElementById('formSection').scrollIntoView({behavior: 'smooth'});
         }
 
         function cancelEdit() {
@@ -418,7 +441,7 @@
             document.getElementById('btnSimpan').innerText = "Simpan Agenda";
             ['inputNama', 'inputNamaKlien', 'inputTanggal', 'inputJam', 'inputKontak', 'inputLokasi', 'inputAlamat', 'inputRekanan'].forEach(i => document.getElementById(i).value = '');
             document.getElementById('btnCancelEdit').classList.add('hidden');
-            document.getElementById('fieldRekanan').style.display = 'none';
+            document.getElementById('fieldRekanan').style.display = isAdmin ? 'block' : 'none';
             aturPilihanPaket(currentMode);
         }
 
