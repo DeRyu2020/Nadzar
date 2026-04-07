@@ -6,25 +6,27 @@
     <title>Nadzar Photowork - Cloud System</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // Perbaikan: Konfigurasi agar Tailwind mendukung toggle class 'dark'
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s; scroll-behavior: smooth; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background-color 0.3s, color 0.3s; scroll-behavior: smooth; }
+        .admin-only { display: none; }
+        .is-admin .admin-only { display: block; }
         .admin-field { display: none; }
         .is-admin .admin-field { display: table-cell; }
         .is-admin #badgeMode { background-color: #EF4444 !important; color: white !important; }
-        
         .loader-ring {
-            border: 3px solid rgba(37, 99, 235, 0.1);
-            border-top: 3px solid #2563EB;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 0.8s linear infinite;
+            border: 3px solid rgba(37, 99, 235, 0.1); border-top: 3px solid #2563EB;
+            border-radius: 50%; width: 40px; height: 40px; animation: spin 0.8s linear infinite;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
     </style>
 </head>
 <body id="mainBody" class="bg-[#F8FAFC] dark:bg-gray-900 text-gray-800 dark:text-gray-100 overflow-x-hidden text-sm">
@@ -32,10 +34,7 @@
     <div id="loadingOverlay" class="fixed inset-0 z-[100] bg-white/95 dark:bg-gray-900/95 flex items-center justify-center hidden backdrop-blur-sm">
         <div class="flex flex-col items-center">
             <div class="loader-ring mb-4"></div>
-            <h3 class="text-blue-600 dark:text-blue-400 font-extrabold tracking-[0.3em] text-[10px] uppercase animate-pulse">
-                Nadzar Cloud Syncing
-            </h3>
-            <p class="text-gray-400 text-[8px] mt-1 font-medium italic">Menyinkronkan data agenda...</p>
+            <h3 class="text-blue-600 dark:text-blue-400 font-extrabold tracking-[0.3em] text-[10px] uppercase animate-pulse">Nadzar Cloud Syncing</h3>
         </div>
     </div>
 
@@ -57,133 +56,324 @@
     </div>
 
     <div id="mainContent" class="hidden opacity-0 transition-all duration-700 container mx-auto p-4 md:p-10 max-w-7xl">
+        
         <div class="flex justify-between items-start mb-8">
             <div>
-                <div id="badgeMode" class="bg-blue-100 text-blue-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block italic border border-blue-200">AKSES: MEMUAT...</div>
+                <div id="badgeMode" class="bg-blue-100 text-blue-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block italic border border-blue-200 tracking-tighter shadow-sm">MEMUAT AKSES...</div>
                 <h1 class="text-3xl font-extrabold text-[#2563EB] tracking-tight">Nadzar Photowork</h1>
             </div>
             <div class="flex gap-2">
-                <button onclick="toggleAdmin()" id="btnLock" title="Akses Admin" class="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-md border border-gray-100 dark:border-gray-700 text-lg hover:bg-yellow-50">🔓</button>
-                <button id="themeToggle" class="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-md dark:border-gray-700">🌙</button>
+                <button onclick="toggleAdmin()" id="btnLock" title="Akses Admin" class="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-md border border-gray-100 dark:border-gray-700 text-lg hover:bg-yellow-50 transition-colors">🔓</button>
+                <button id="themeToggle" class="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-md border border-gray-100 dark:border-gray-700 transition-colors">🌙</button>
+            </div>
+        </div>
+
+        <div class="admin-only mb-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div class="lg:col-span-2 bg-gradient-to-br from-blue-700 to-indigo-900 text-white p-6 rounded-[2.5rem] shadow-xl relative overflow-hidden min-h-[220px]">
+                    <div class="relative z-10 flex flex-col md:flex-row justify-between gap-6 h-full">
+                        
+                        <div class="flex-1 flex flex-col">
+                            <h3 id="cdLabel" class="text-[9px] font-bold uppercase tracking-[0.2em] text-blue-200 mb-2">Target Utama</h3>
+                            <div id="cdNama" class="text-xl font-black italic uppercase leading-tight mb-4 flex-1 overflow-y-auto custom-scroll max-h-[120px] pr-2">
+                                Memuat Agenda...
+                            </div>
+                            
+                            <div id="countdownDisplay" class="flex gap-4 items-center mt-auto">
+                                <div class="text-center"><span id="days" class="text-3xl font-black block leading-none text-white">00</span><span class="text-[7px] uppercase font-bold opacity-50">Hari</span></div>
+                                <div class="text-xl opacity-20">:</div>
+                                <div class="text-center"><span id="hours" class="text-3xl font-black block leading-none text-white">00</span><span class="text-[7px] uppercase font-bold opacity-50">Jam</span></div>
+                                <div class="text-xl opacity-20">:</div>
+                                <div class="text-center"><span id="mins" class="text-3xl font-black block leading-none text-white">00</span><span class="text-[7px] uppercase font-bold opacity-50">Menit</span></div>
+                            </div>
+                        </div>
+
+                        <div id="nextScheduleBox" class="flex-1 bg-white/10 backdrop-blur-md rounded-3xl p-5 border border-white/10 hidden md:flex flex-col">
+                            <h4 class="text-[8px] font-black uppercase tracking-widest text-blue-300 mb-1 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span> Jadwal Selanjutnya
+                            </h4>
+                            <div id="nextDate" class="text-xs font-black text-white mb-4 opacity-100 tracking-wider">---</div>
+                            
+                            <div id="nextList" class="flex-1 overflow-y-auto custom-scroll pr-2 space-y-3">
+                                </div>
+                        </div>
+                    </div>
+                    <div class="absolute right-[-10px] bottom-[-20px] text-7xl opacity-[0.05] italic font-black tracking-tight pointer-events-none">Veridical.co</div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-[2.5rem] shadow-xl border border-gray-50 dark:border-gray-700 flex flex-col justify-center">
+                    <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] opacity-30 mb-4 text-center lg:text-left">Ringkasan Job Bulan Ini</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="border-r border-gray-100 dark:border-gray-700 text-center">
+                            <div id="statTotal" class="text-4xl font-black text-blue-600 leading-none">0</div>
+                            <div class="text-[8px] font-bold uppercase opacity-40 mt-1 text-blue-400">Total Job</div>
+                        </div>
+                        <div class="pl-2 text-center">
+                            <div id="statVendor" class="text-4xl font-black text-purple-600 leading-none">0</div>
+                            <div class="text-[8px] font-bold uppercase opacity-40 mt-1 text-purple-400">MUA Job</div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div class="lg:col-span-4 bg-white dark:bg-gray-800 p-6 md:p-8 rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-gray-700 h-fit">
-                <h2 id="formTitle" class="text-xl font-black mb-2 italic tracking-tight text-blue-600 uppercase">ISI DATA</h2>
+            <div class="lg:col-span-4 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border border-gray-50 dark:border-gray-700 h-fit">
+                <h2 id="formTitle" class="text-xl font-black mb-1 italic tracking-tight text-blue-600 uppercase">ISI DATA</h2>
                 
-                <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 mb-6 rounded-r-xl">
-                    <p class="text-[11px] leading-relaxed font-semibold text-blue-800 dark:text-blue-200">
-                        Harap melihat dulu <a href="#tabelBagian" class="underline decoration-2 decoration-blue-400 font-bold text-blue-600 dark:text-blue-400">agenda dibawah</a>, atau cek Agenda via 
-                        <a href="https://wa.me/6289685356850" target="_blank" class="underline decoration-2 decoration-green-400 font-bold text-green-600 dark:text-green-400">Whatsapp Nadzar</a>
-                    </p>
+                <div class="flex flex-wrap items-center gap-3 mb-4">
+                    <a href="#tabelBagian" class="text-[9px] font-bold uppercase tracking-widest text-blue-500 hover:text-blue-700 transition-colors">📂 Lihat Agenda</a>
+                    <span class="text-gray-200 dark:text-gray-700">|</span>
+                    <a href="https://wa.me/6289685356850" target="_blank" class="text-[9px] font-bold uppercase tracking-widest text-green-600 hover:text-green-700 transition-colors">📞 Hubungi Nadzar</a>
+                </div>
+
+                <div class="flex items-center gap-2 mb-6">
+                    <div id="statusDot" class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                    <span class="text-[9px] font-bold uppercase tracking-widest opacity-40">Live Sync Enabled</span>
                 </div>
 
                 <div class="space-y-4">
                     <input type="hidden" id="editId">
                     <div>
                         <label id="labelNama" class="text-[10px] font-bold uppercase ml-2 opacity-50">Nama Utama</label>
-                        <input type="text" id="inputNama" class="w-full p-4 mt-1 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none font-bold shadow-sm focus:border-blue-300">
+                        <input type="text" id="inputNama" class="w-full p-4 mt-1 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none font-bold focus:border-blue-300">
                     </div>
-                    
                     <div id="containerNamaKlien" class="hidden">
-                        <label class="text-[10px] font-bold uppercase ml-2 opacity-50 text-purple-600">Nama User / Klien MUA</label>
-                        <input type="text" id="inputNamaKlien" class="w-full p-4 mt-1 rounded-xl border border-purple-100 dark:bg-gray-700 outline-none font-bold shadow-sm focus:border-purple-300">
+                        <label class="text-[10px] font-bold uppercase ml-2 opacity-50 text-purple-600">Nama Klien (MUA)</label>
+                        <input type="text" id="inputNamaKlien" class="w-full p-4 mt-1 rounded-2xl border border-purple-50 dark:bg-gray-700 dark:border-gray-600 outline-none font-bold focus:border-purple-300">
                     </div>
-
                     <div class="grid grid-cols-2 gap-2 text-xs font-bold">
                         <div>
                             <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Paket</label>
-                            <select id="inputKategori" class="w-full p-4 mt-1 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm cursor-pointer"></select>
+                            <select id="inputKategori" class="w-full p-4 mt-1 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none"></select>
                         </div>
                         <div>
                             <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Tanggal</label>
-                            <input type="date" id="inputTanggal" class="w-full p-4 mt-1 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm">
+                            <input type="date" id="inputTanggal" class="w-full p-4 mt-1 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none">
                         </div>
                     </div>
-
+                    <div>
+                        <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Waktu Acara (Teks)</label>
+                        <input type="text" id="inputJam" placeholder="Contoh: 08:00 WIB" class="w-full p-4 mt-1 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none font-medium">
+                    </div>
                     <div>
                         <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Kontak WhatsApp</label>
-                        <input type="text" id="inputKontak" placeholder="08..." class="w-full p-4 mt-1 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm focus:border-blue-300">
+                        <input type="text" id="inputKontak" placeholder="08..." class="w-full p-4 mt-1 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none">
                     </div>
-
                     <div>
                         <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Lokasi / Alamat</label>
-                        <input type="text" id="inputLokasi" placeholder="Nama Lokasi Acara" class="w-full p-4 mt-1 mb-2 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm focus:border-blue-300">
-                        <textarea id="inputAlamat" placeholder="Alamat Lengkap / Catatan" rows="2" class="w-full p-4 rounded-xl border border-gray-100 dark:bg-gray-700 outline-none shadow-sm focus:border-blue-300"></textarea>
+                        <input type="text" id="inputLokasi" placeholder="Nama Lokasi" class="w-full p-4 mt-1 mb-2 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none">
+                        <textarea id="inputAlamat" placeholder="Detail Alamat" rows="2" class="w-full p-4 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none"></textarea>
                     </div>
-                    
-                    <button onclick="simpanData()" id="btnSimpan" class="w-full bg-[#2563EB] text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition uppercase text-[10px] tracking-widest shadow-lg">Simpan ke Cloud</button>
+                    <button onclick="simpanData()" id="btnSimpan" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition uppercase text-[10px] tracking-widest shadow-lg shadow-blue-200 dark:shadow-none">Simpan Agenda</button>
                     <button onclick="cancelEdit()" id="btnCancelEdit" class="hidden w-full text-gray-400 font-bold py-2 text-[10px] uppercase">Batal Ubah</button>
                 </div>
             </div>
 
-            <div id="tabelBagian" class="lg:col-span-8 bg-white dark:bg-gray-800 p-6 md:p-8 rounded-[2.5rem] shadow-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
-                <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 border-b pb-6 dark:border-gray-700">
-                    <h2 class="text-xl font-black italic tracking-tight text-blue-600 uppercase">Agenda Nadzar</h2>
-                    
+            <div id="tabelBagian" class="lg:col-span-8 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border border-gray-50 dark:border-gray-700 overflow-hidden">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                    <h2 class="text-xl font-black italic tracking-tight text-blue-600 uppercase">Daftar Agenda</h2>
                     <div id="adminControls" class="hidden flex flex-wrap gap-2 justify-center w-full md:w-auto">
-                        <div class="relative w-full md:w-auto">
-                            <input type="text" id="searchBar" onkeyup="muatTabel()" placeholder="Cari nama/lokasi..." class="w-full md:w-48 p-2 pl-8 rounded-lg border border-gray-200 dark:bg-gray-700 text-[10px] font-bold outline-none focus:ring-2 focus:ring-blue-500">
-                            <span class="absolute left-2.5 top-2.5 opacity-30 text-[10px]">🔍</span>
-                        </div>
-                        <button onclick="tarikDataCloud()" class="bg-orange-50 text-orange-600 px-3 py-2 rounded-lg text-[9px] font-bold uppercase shadow-sm hover:bg-orange-100">Sync ☁️</button>
-                        <button onclick="eksporExcel()" class="bg-green-50 text-green-600 px-3 py-2 rounded-lg text-[9px] font-bold uppercase shadow-sm hover:bg-green-100">Excel 📥</button>
+                        <input type="text" id="searchBar" onkeyup="muatTabel()" placeholder="Cari..." class="w-full md:w-48 p-2 rounded-xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 text-[10px] font-bold outline-none">
+                        <button onclick="tarikDataCloud()" class="bg-orange-50 text-orange-600 px-4 py-2 rounded-xl text-[9px] font-bold uppercase transition-colors">Sync</button>
+                        <button onclick="eksporExcel()" class="bg-green-50 text-green-600 px-4 py-2 rounded-xl text-[9px] font-bold uppercase transition-colors">Excel</button>
                     </div>
                 </div>
-                
-                <div class="overflow-x-auto min-h-[300px]">
-                    <table class="w-full text-left border-collapse" id="tabelUtama">
+                <div class="overflow-x-auto min-h-[400px]">
+                    <table class="w-full text-left" id="tabelUtama">
                         <thead>
-                            <tr class="text-gray-400 border-b border-gray-50 dark:border-gray-700 text-[9px] uppercase font-bold tracking-widest">
-                                <th class="pb-4 pr-2">Tanggal</th>
-                                <th class="pb-4 pr-2">Agenda</th>
-                                <th class="pb-4 pr-2">Paket</th>
-                                <th class="pb-4 admin-field text-center">Aksi</th>
+                            <tr class="text-gray-400 border-b border-gray-50 dark:border-gray-800 text-[9px] uppercase font-black tracking-[0.2em]">
+                                <th class="pb-4">Waktu</th>
+                                <th class="pb-4">Klien / Lokasi</th>
+                                <th class="pb-4">Paket</th>
+                                <th class="pb-4 admin-field text-center">Opsi</th>
                             </tr>
                         </thead>
-                        <tbody id="isiTabel" class="divide-y divide-gray-50 dark:divide-gray-800 text-xs"></tbody>
+                        <tbody id="isiTabel" class="divide-y divide-gray-50 dark:divide-gray-800"></tbody>
                     </table>
-                    <div id="emptyState" class="py-20 text-center opacity-20 italic font-bold text-[10px] tracking-[0.3em] uppercase">Data Tidak Ditemukan</div>
+                    <div id="emptyState" class="py-20 text-center opacity-10 italic font-bold text-[10px] uppercase tracking-[0.5em]">No Data</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbyTRQZqG09rILJgfwt7evuvnno_f3_ddDhnjmCoXCkVkGqZstoUIg4HDEvVE3DvcY55cQ/exec";
-        
-        let currentMode = "";
-        let isAdmin = false;
-        let dataSimpanan = [];
+        const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwEyM6S4oHQkU99oJOAh4A6zBD7gT61-5K4BGPesnrRhHwyLG03OqmKGXa2V4U6pmnXtg/exec";
+        let currentMode = "", isAdmin = false, dataSimpanan = [], cdInterval = null;
 
-        try {
-            const localData = localStorage.getItem('nadzarData');
-            dataSimpanan = localData ? JSON.parse(localData) : [];
-        } catch (e) { dataSimpanan = []; }
+        // Toggle Dark Mode Perbaikan
+        document.getElementById('themeToggle').onclick = () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            document.getElementById('themeToggle').innerText = isDark ? '☀️' : '🌙';
+        };
 
         async function openApp(mode) {
-            const loading = document.getElementById('loadingOverlay');
-            loading.classList.remove('hidden');
-            
-            try {
-                const response = await fetch(URL_SCRIPT + '?t=' + Date.now());
-                const cloudData = await response.json();
-                if(cloudData && Array.isArray(cloudData)) {
-                    dataSimpanan = cloudData;
-                    localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
-                }
-            } catch (e) { console.warn("Offline mode active."); }
-
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            await tarikDataCloud(true);
             document.getElementById('selectionScreen').style.display = 'none';
             document.getElementById('mainContent').classList.remove('hidden');
             setTimeout(() => document.getElementById('mainContent').classList.add('opacity-100'), 50);
-
             currentMode = mode;
-            updateBadge();
-            aturPilihanPaket(mode);
-            muatTabel();
-            loading.classList.add('hidden');
+            updateBadge(); aturPilihanPaket(mode); muatTabel();
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        function updateStats() {
+            if(!isAdmin) return; 
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+            const todayTs = new Date(todayStr).getTime();
+
+            const bulanIni = dataSimpanan.filter(d => {
+                const dt = new Date(d.tgl);
+                return dt.getMonth() === now.getMonth() && dt.getFullYear() === now.getFullYear();
+            });
+            document.getElementById('statTotal').innerText = bulanIni.length;
+            document.getElementById('statVendor').innerText = bulanIni.filter(d => d.tipe === 'Vendor').length;
+
+            const allSorted = dataSimpanan.filter(d => d.tgl).sort((a,b) => new Date(a.tgl) - new Date(b.tgl));
+            const jobsHariIni = allSorted.filter(d => d.tgl === todayStr);
+            const jobsMendatang = allSorted.filter(d => new Date(d.tgl).getTime() > todayTs);
+
+            if(jobsHariIni.length > 0) {
+                document.getElementById('cdLabel').innerText = "🔥 AGENDA HARI INI";
+                const isiNama = jobsHariIni.map(j => {
+                    const nm = j.tipe === 'Vendor' ? j.namaKlien : j.nama;
+                    return `<div class="mb-2"><span class="text-blue-200 text-[10px] font-bold">[${j.kat}]</span> <span class="uppercase">${nm}</span> <span class="text-[9px] opacity-60 font-normal italic">(${j.jam || '-'})</span></div>`;
+                }).join("");
+                document.getElementById('cdNama').innerHTML = isiNama;
+                
+                if(jobsMendatang.length > 0) {
+                    const targetTgl = jobsMendatang[0].tgl;
+                    const samaTanggal = jobsMendatang.filter(j => j.tgl === targetTgl);
+                    
+                    document.getElementById('nextScheduleBox').classList.remove('hidden');
+                    document.getElementById('nextDate').innerText = formatTanggalIndo(targetTgl);
+                    
+                    const isiNext = samaTanggal.map(j => {
+                        const nm = j.tipe === 'Vendor' ? j.namaKlien : j.nama;
+                        return `<div>
+                            <div class="text-white font-bold text-xs truncate uppercase">${nm}</div>
+                            <div class="text-[9px] text-blue-300 font-bold italic">${j.jam || '---'}</div>
+                        </div>`;
+                    }).join("");
+                    document.getElementById('nextList').innerHTML = isiNext;
+                } else {
+                    document.getElementById('nextScheduleBox').classList.add('hidden');
+                }
+                startCountdown(todayStr);
+            } 
+            else if(jobsMendatang.length > 0) {
+                document.getElementById('cdLabel').innerText = "TARGET TERDEKAT";
+                document.getElementById('nextScheduleBox').classList.add('hidden');
+                
+                const targetTgl = jobsMendatang[0].tgl;
+                const samaTanggal = jobsMendatang.filter(j => j.tgl === targetTgl);
+                
+                const isiNama = samaTanggal.map(j => {
+                    const nm = j.tipe === 'Vendor' ? j.namaKlien : j.nama;
+                    return `<div class="mb-2"><span class="text-blue-200 text-[10px] font-bold">[${j.kat}]</span> <span class="uppercase">${nm}</span> <span class="text-[9px] opacity-60 font-normal italic">(${j.jam || '-'})</span></div>`;
+                }).join("");
+                
+                document.getElementById('cdNama').innerHTML = isiNama;
+                startCountdown(targetTgl);
+            } else {
+                document.getElementById('cdNama').innerText = "Agenda Kosong";
+                if(cdInterval) clearInterval(cdInterval);
+                ['days','hours','mins'].forEach(i => document.getElementById(i).innerText = "00");
+                document.getElementById('nextScheduleBox').classList.add('hidden');
+            }
+        }
+
+        function startCountdown(dateStr) {
+            if(cdInterval) clearInterval(cdInterval);
+            const targetDate = new Date(dateStr).getTime();
+            cdInterval = setInterval(() => {
+                const diff = targetDate - new Date().getTime();
+                if (diff < 0) {
+                    ['days','hours','mins'].forEach(i => document.getElementById(i).innerText = "00");
+                    return;
+                }
+                document.getElementById('days').innerText = String(Math.floor(diff / 86400000)).padStart(2, '0');
+                document.getElementById('hours').innerText = String(Math.floor((diff % 86400000) / 3600000)).padStart(2, '0');
+                document.getElementById('mins').innerText = String(Math.floor((diff % 3600000) / 60000)).padStart(2, '0');
+            }, 1000);
+        }
+
+        function muatTabel() {
+            const tabel = document.getElementById('isiTabel');
+            const keyword = document.getElementById('searchBar').value.toLowerCase();
+            tabel.innerHTML = '';
+            const filtered = dataSimpanan.filter(d => `${d.nama} ${d.namaKlien} ${d.lokasi} ${d.kat}`.toLowerCase().includes(keyword));
+            const sorted = filtered.sort((a,b) => new Date(a.tgl || 0) - new Date(b.tgl || 0));
+            document.getElementById('emptyState').classList.toggle('hidden', sorted.length > 0);
+
+            sorted.forEach(d => {
+                const isVendor = d.tipe === 'Vendor';
+                let infoNama = `<div class="font-bold text-gray-800 dark:text-white uppercase">${d.nama}</div>`;
+                if(isVendor && d.namaKlien !== "-") infoNama = `<div class="text-purple-600 font-extrabold uppercase">${d.namaKlien}</div><div class="text-[8px] opacity-40 uppercase">MUA: ${d.nama}</div>`;
+
+                let row = `<tr class="border-b border-gray-50 dark:border-gray-800 hover:bg-blue-50/20 transition-colors">
+                    <td class="py-5 pr-2">
+                        <div class="font-black text-blue-600 uppercase text-[10px]">${formatTanggalIndo(d.tgl)}</div>
+                        <div class="text-[9px] font-bold text-gray-400 italic">${d.jam || '-'}</div>
+                    </td>
+                    <td class="py-5 pr-2">${infoNama}<div class="text-[9px] opacity-40 uppercase truncate max-w-[150px] dark:opacity-60">${d.lokasi || '-'}</div></td>
+                    <td class="py-5 pr-2"><span class="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full text-[8px] font-black uppercase text-gray-600 dark:text-gray-300">${d.kat || '-'}</span></td>`;
+                if(isAdmin) {
+                    const waLink = d.wa ? (d.wa.startsWith('0') ? '62' + d.wa.substring(1) : d.wa) : '';
+                    row += `<td class="py-5 text-center"><div class="flex gap-2 justify-center">
+                        <a href="https://wa.me/${waLink}" target="_blank" class="bg-green-500/10 text-green-600 p-2 rounded-xl text-xs" title="WhatsApp">📱</a>
+                        <button onclick="editData(${d.id})" class="bg-blue-500/10 text-blue-600 p-2 rounded-xl text-xs" title="Edit">✏️</button>
+                        <button onclick="hapusData(${d.id})" class="bg-red-500/10 text-red-600 p-2 rounded-xl text-xs" title="Hapus">🗑️</button>
+                    </div></td>`;
+                }
+                tabel.insertAdjacentHTML('beforeend', row + `</tr>`);
+            });
+            updateStats();
+        }
+
+        async function toggleAdmin() {
+            if(!isAdmin) {
+                const pass = prompt("Admin Password:");
+                if(pass === "123456") {
+                    isAdmin = true;
+                    document.getElementById('mainBody').classList.add('is-admin');
+                    document.getElementById('adminControls').classList.remove('hidden');
+                    document.getElementById('btnLock').innerText = "🔒";
+                    updateBadge(); muatTabel();
+                } else if(pass !== null) alert("Password Salah!");
+            } else {
+                isAdmin = false;
+                document.getElementById('mainBody').classList.remove('is-admin');
+                document.getElementById('adminControls').classList.add('hidden');
+                document.getElementById('btnLock').innerText = "🔓";
+                updateBadge(); muatTabel();
+            }
+        }
+
+        function formatTanggalIndo(tglString) {
+            if(!tglString) return "-";
+            const d = new Date(tglString);
+            const opsi = { day: '2-digit', month: '2-digit', year: 'numeric' };
+            return isNaN(d.getTime()) ? tglString : d.toLocaleDateString('id-ID', opsi).replace(/\//g, '-');
+        }
+
+        function updateBadge() {
+            const b = document.getElementById('badgeMode');
+            b.innerText = isAdmin ? "MODE: ADMIN" : "MODE: " + currentMode;
+            b.className = isAdmin ? "bg-red-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-full uppercase mb-2 inline-block shadow-lg shadow-red-200" : "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[9px] font-bold px-4 py-1.5 rounded-full uppercase mb-2 inline-block border border-blue-100 dark:border-blue-800";
+        }
+
+        async function tarikDataCloud(silent = false) {
+            if(!silent) document.getElementById('loadingOverlay').classList.remove('hidden');
+            try {
+                const res = await fetch(URL_SCRIPT + '?t=' + Date.now());
+                dataSimpanan = await res.json();
+                localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
+                muatTabel();
+            } catch (e) { console.error("Cloud Sync Error", e); }
+            document.getElementById('loadingOverlay').classList.add('hidden');
         }
 
         function aturPilihanPaket(mode) {
@@ -200,233 +390,69 @@
             }
         }
 
-        function formatTanggalIndo(tglString) {
-            if(!tglString) return "-";
-            const d = new Date(tglString);
-            if(isNaN(d.getTime())) return tglString;
-            return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`;
-        }
-
-        function formatWA(no) {
-            if(!no) return "";
-            let cleaned = no.toString().trim();
-            if(cleaned.startsWith('8')) return '0' + cleaned;
-            return cleaned;
-        }
-
-        function muatTabel() {
-            const tabel = document.getElementById('isiTabel');
-            const keyword = document.getElementById('searchBar').value.toLowerCase();
-            if(!tabel) return;
-            tabel.innerHTML = '';
-            
-            const dataValid = Array.isArray(dataSimpanan) ? dataSimpanan : [];
-            const filtered = dataValid.filter(d => {
-                const searchTxt = `${d.nama} ${d.namaKlien} ${d.lokasi} ${d.kat}`.toLowerCase();
-                return searchTxt.includes(keyword);
-            });
-
-            // Sorting untuk tampilan tabel browser
-            const sorted = filtered.sort((a,b) => new Date(a.tgl || 0) - new Date(b.tgl || 0));
-            document.getElementById('emptyState').classList.toggle('hidden', sorted.length > 0);
-
-            sorted.forEach(d => {
-                const fTgl = formatTanggalIndo(d.tgl);
-                const isVendor = d.tipe === 'Vendor';
-                let infoNama = `<div class="font-bold text-gray-800 dark:text-gray-100 uppercase leading-tight">${d.nama || 'No Name'}</div>
-                                <div class="text-[8px] opacity-40 font-bold uppercase truncate max-w-[150px]">${d.lokasi || '-'}</div>`;
-                
-                if(isVendor && d.namaKlien && d.namaKlien !== "-") {
-                    infoNama = `<div class="text-purple-600 dark:text-purple-400 font-extrabold uppercase text-[11px] leading-tight">${d.namaKlien}</div>
-                                <div class="text-[8px] opacity-50 font-bold uppercase">Vendor: ${d.nama}</div>`;
-                }
-
-                let row = `<tr class="border-b border-gray-50 dark:border-gray-800 hover:bg-blue-50/30">
-                    <td class="py-4 pr-2 align-top font-black text-blue-600 uppercase text-[9px] whitespace-nowrap">${fTgl}</td>
-                    <td class="py-4 pr-2">${infoNama}</td>
-                    <td class="py-4 pr-2"><span class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded text-[8px] font-black uppercase">${d.kat || '-'}</span></td>`;
-                
-                if(isAdmin) {
-                    const noWA = formatWA(d.wa);
-                    const waLink = noWA.startsWith('0') ? '62' + noWA.substring(1) : noWA;
-                    row += `<td class="py-4 text-center align-top">
-                        <div class="flex gap-1 justify-center">
-                            <a href="https://wa.me/${waLink}" target="_blank" class="bg-green-500 p-1.5 rounded-md text-white text-xs">📱</a>
-                            <button onclick="editData(${d.id})" class="bg-blue-500 p-1.5 rounded-md text-white text-xs">✏️</button>
-                            <button onclick="hapusData(${d.id})" class="bg-red-500 p-1.5 rounded-md text-white text-xs">🗑️</button>
-                        </div>
-                    </td>`;
-                }
-                row += `</tr>`;
-                tabel.insertAdjacentHTML('beforeend', row);
-            });
-        }
-
-        async function tarikDataCloud(silent = false) {
-            const loading = document.getElementById('loadingOverlay');
-            if(!silent) loading.classList.remove('hidden');
-            try {
-                const response = await fetch(URL_SCRIPT + '?t=' + Date.now());
-                const cloudData = await response.json();
-                if(cloudData && Array.isArray(cloudData)) {
-                    dataSimpanan = cloudData;
-                    localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
-                    muatTabel();
-                    if(!silent) {
-                        loading.classList.add('hidden');
-                        setTimeout(() => alert("✅ Sinkron Selesai!"), 50);
-                    }
-                }
-            } catch (e) {
-                if(!silent) {
-                    loading.classList.add('hidden');
-                    alert("❌ Gagal Sinkron!");
-                }
-            } finally {
-                loading.classList.add('hidden');
-            }
-        }
-
-        function updateBadge() {
-            const badge = document.getElementById('badgeMode');
-            if(!badge) return;
-            if(isAdmin) {
-                badge.innerText = "AKSES: ADMIN";
-                badge.className = "bg-red-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase mb-2 italic";
-            } else {
-                badge.innerText = "AKSES: " + currentMode;
-                badge.className = "bg-blue-100 text-blue-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase mb-2 italic border border-blue-200";
-            }
-        }
-
-        async function toggleAdmin() {
-            if(!isAdmin) {
-                const pass = prompt("Password Admin:");
-                if(pass === "123456") {
-                    isAdmin = true;
-                    document.getElementById('loadingOverlay').classList.remove('hidden');
-                    document.getElementById('mainBody').classList.add('is-admin');
-                    document.getElementById('adminControls').classList.remove('hidden');
-                    document.getElementById('btnLock').innerText = "🔒";
-                    updateBadge();
-                    await tarikDataCloud(true); 
-                } else if(pass !== null) { alert("Akses Ditolak!"); }
-            } else {
-                isAdmin = false;
-                document.getElementById('mainBody').classList.remove('is-admin');
-                document.getElementById('adminControls').classList.add('hidden');
-                document.getElementById('btnLock').innerText = "🔓";
-                updateBadge();
-                muatTabel();
-            }
-        }
-
-        // PERBAIKAN: Sorting data sebelum dikirim ke Cloud
         async function simpanData() {
             const val = (id) => document.getElementById(id).value;
-            if(!val('inputNama') || !val('inputTanggal')) return alert("Isi Nama & Tanggal!");
-            
-            const loading = document.getElementById('loadingOverlay');
-            loading.classList.remove('hidden');
-
+            if(!val('inputNama') || !val('inputTanggal')) return alert("Mohon lengkapi Nama & Tanggal!");
+            document.getElementById('loadingOverlay').classList.remove('hidden');
             const obj = {
                 id: document.getElementById('editId').value || Date.now(),
-                tipe: currentMode || 'Pribadi', 
-                nama: val('inputNama'),
+                tipe: currentMode, nama: val('inputNama'),
                 namaKlien: currentMode === 'Vendor' ? val('inputNamaKlien') : "-",
-                kat: val('inputKategori'), 
-                tgl: val('inputTanggal'),
-                wa: formatWA(val('inputKontak')),
-                lokasi: val('inputLokasi'), 
-                alamat: val('inputAlamat')
+                kat: val('inputKategori'), tgl: val('inputTanggal'), jam: val('inputJam'),
+                wa: val('inputKontak'), lokasi: val('inputLokasi'), alamat: val('inputAlamat')
             };
-
             const idx = dataSimpanan.findIndex(i => i.id == obj.id);
-            if(idx > -1) dataSimpanan[idx] = obj;
-            else dataSimpanan.push(obj);
-
-            // LOGIKA SORTING: Urutkan data berdasarkan tanggal sebelum simpan ke Cloud
-            dataSimpanan.sort((a, b) => new Date(a.tgl || 0) - new Date(b.tgl || 0));
-
+            if(idx > -1) dataSimpanan[idx] = obj; else dataSimpanan.push(obj);
             try {
-                await fetch(URL_SCRIPT, { 
-                    method: 'POST', 
-                    mode: 'no-cors', 
-                    body: JSON.stringify(dataSimpanan) 
-                });
+                await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataSimpanan) });
                 localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
-                alert("✅ Cloud Updated & Sorted!");
-                cancelEdit();
-                muatTabel();
-            } catch (e) { alert("⚠️ Terkirim Offline!"); }
-            finally { loading.classList.add('hidden'); }
+                cancelEdit(); muatTabel();
+            } catch (e) { alert("Gagal Sync ke Cloud!"); }
+            document.getElementById('loadingOverlay').classList.add('hidden');
         }
 
         function editData(id) {
             const item = dataSimpanan.find(i => i.id == id);
             if(!item) return;
-
+            currentMode = item.tipe || 'Pribadi';
+            aturPilihanPaket(currentMode);
+            updateBadge();
             document.getElementById('editId').value = item.id;
-            document.getElementById('inputNama').value = item.nama || '';
-            
-            if (item.tgl) {
-                const dateObj = new Date(item.tgl);
-                if (!isNaN(dateObj.getTime())) {
-                    const y = dateObj.getFullYear();
-                    const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-                    const d = String(dateObj.getDate()).padStart(2, '0');
-                    document.getElementById('inputTanggal').value = `${y}-${m}-${d}`;
-                } else {
-                    document.getElementById('inputTanggal').value = item.tgl;
-                }
-            }
-
-            document.getElementById('inputKontak').value = item.wa || '';
-            document.getElementById('inputLokasi').value = item.lokasi || '';
-            document.getElementById('inputAlamat').value = item.alamat || '';
-            document.getElementById('inputKategori').value = item.kat || '';
-            
-            if(item.tipe === 'Vendor') {
-                document.getElementById('containerNamaKlien').classList.remove('hidden');
-                document.getElementById('inputNamaKlien').value = item.namaKlien || '';
-            } else {
-                document.getElementById('containerNamaKlien').classList.add('hidden');
-            }
-
-            document.getElementById('btnSimpan').innerText = "Update Data";
+            document.getElementById('inputNama').value = item.nama;
+            document.getElementById('inputJam').value = item.jam;
+            document.getElementById('inputTanggal').value = item.tgl;
+            document.getElementById('inputKontak').value = item.wa;
+            document.getElementById('inputLokasi').value = item.lokasi;
+            document.getElementById('inputAlamat').value = item.alamat;
+            setTimeout(() => { document.getElementById('inputKategori').value = item.kat; }, 10);
+            if(currentMode === 'Vendor') document.getElementById('inputNamaKlien').value = item.namaKlien;
+            document.getElementById('btnSimpan').innerText = "Update Agenda";
             document.getElementById('btnCancelEdit').classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function cancelEdit() {
             document.getElementById('editId').value = '';
-            document.getElementById('btnSimpan').innerText = "Simpan ke Cloud";
-            ['inputNama', 'inputNamaKlien', 'inputTanggal', 'inputKontak', 'inputLokasi', 'inputAlamat'].forEach(i => document.getElementById(i).value = '');
+            document.getElementById('btnSimpan').innerText = "Simpan Agenda";
+            ['inputNama', 'inputNamaKlien', 'inputTanggal', 'inputJam', 'inputKontak', 'inputLokasi', 'inputAlamat'].forEach(i => document.getElementById(i).value = '');
             document.getElementById('btnCancelEdit').classList.add('hidden');
+            aturPilihanPaket(currentMode);
         }
 
-        function hapusData(id) {
-            if(confirm("Hapus agenda ini?")) {
+        async function hapusData(id) {
+            if(confirm("Hapus agenda ini secara permanen dari cloud?")) {
                 dataSimpanan = dataSimpanan.filter(i => i.id != id);
-                // Pastikan tetap terurut setelah dihapus
-                dataSimpanan.sort((a, b) => new Date(a.tgl || 0) - new Date(b.tgl || 0));
-                
                 localStorage.setItem('nadzarData', JSON.stringify(dataSimpanan));
                 muatTabel();
-                fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataSimpanan) });
+                await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataSimpanan) });
             }
         }
 
         function eksporExcel() {
-            const ws = XLSX.utils.json_to_sheet(dataSimpanan);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Agenda");
-            XLSX.writeFile(wb, "Agenda_Nadzar.xlsx");
+            const ws = XLSX.utils.json_to_sheet(dataSimpanan), wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Database Nadzar");
+            XLSX.writeFile(wb, "Data_Nadzar_Cloud.xlsx");
         }
-
-        document.getElementById('themeToggle').onclick = () => {
-            document.documentElement.classList.toggle('dark');
-        };
     </script>
 </body>
 </html>
