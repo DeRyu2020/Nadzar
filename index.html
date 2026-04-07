@@ -16,11 +16,7 @@
         body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background-color 0.3s, color 0.3s; scroll-behavior: smooth; }
         .admin-only { display: none; }
         .is-admin .admin-only { display: block; }
-        .admin-field { display: none; }
-        .is-admin .admin-field { display: block; }
-        @media (min-width: 768px) {
-            .admin-field { display: table-cell; }
-        }
+        #fieldRekanan { display: none; }
         .is-admin #badgeMode { background-color: #EF4444 !important; color: white !important; }
         .loader-ring {
             border: 3px solid rgba(37, 99, 235, 0.1); border-top: 3px solid #2563EB;
@@ -74,17 +70,14 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div class="lg:col-span-2 bg-gradient-to-br from-blue-700 to-indigo-900 text-white p-6 md:p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden min-h-[220px]">
                     <div class="relative z-10 flex flex-col md:flex-row justify-between gap-6 h-full">
-                        
                         <div class="flex-1 flex flex-col justify-center">
                             <h3 id="cdLabel" class="text-[9px] font-bold uppercase tracking-[0.2em] text-blue-200 mb-3 flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-blue-300 animate-ping"></span> 
-                                Target Utama
+                                <span class="w-2 h-2 rounded-full bg-blue-300 animate-ping"></span> Target Utama
                             </h3>
                             <div id="cdNama" class="text-xl md:text-2xl font-black italic uppercase leading-tight flex-1 overflow-y-auto custom-scroll max-h-[150px] pr-2">
                                 Memuat Agenda...
                             </div>
                         </div>
-
                         <div id="nextScheduleBox" class="flex-1 bg-white/10 backdrop-blur-md rounded-3xl p-5 border border-white/10 hidden md:flex flex-col">
                             <h4 class="text-[8px] font-black uppercase tracking-widest text-blue-300 mb-2 flex items-center gap-1">
                                 <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span> Jadwal Selanjutnya
@@ -93,7 +86,6 @@
                             <div id="nextList" class="flex-1 overflow-y-auto custom-scroll pr-2 space-y-3"></div>
                         </div>
                     </div>
-                    <div class="absolute right-[-10px] bottom-[-20px] text-7xl opacity-[0.05] italic font-black tracking-tight pointer-events-none uppercase">Veridical</div>
                 </div>
 
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-[2.5rem] shadow-xl border border-gray-50 dark:border-gray-700 flex flex-col justify-center">
@@ -101,11 +93,11 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div class="border-r border-gray-100 dark:border-gray-700 text-center">
                             <div id="statTotal" class="text-4xl font-black text-blue-600 leading-none">0</div>
-                            <div class="text-[8px] font-bold uppercase opacity-40 mt-1 text-blue-400">Total Job</div>
+                            <div class="text-[8px] font-bold uppercase mt-1 text-blue-400">Total Job</div>
                         </div>
                         <div class="pl-2 text-center">
                             <div id="statVendor" class="text-4xl font-black text-purple-600 leading-none">0</div>
-                            <div class="text-[8px] font-bold uppercase opacity-40 mt-1 text-purple-400">MUA Job</div>
+                            <div class="text-[8px] font-bold uppercase mt-1 text-purple-400">MUA Job</div>
                         </div>
                     </div>
                 </div>
@@ -116,18 +108,14 @@
             <div class="lg:col-span-4 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border border-gray-50 dark:border-gray-700 h-fit">
                 <h2 id="formTitle" class="text-xl font-black mb-1 italic tracking-tight text-blue-600 uppercase">ISI DATA</h2>
                 
-                <div class="flex flex-wrap items-center gap-3 mb-4">
-                    <a href="#tabelBagian" class="text-[9px] font-bold uppercase tracking-widest text-blue-500 hover:text-blue-700 transition-colors">📂 Lihat Agenda</a>
-                    <span class="text-gray-200 dark:text-gray-700">|</span>
-                    <a href="https://wa.me/6289685356850" target="_blank" class="text-[9px] font-bold uppercase tracking-widest text-green-600 hover:text-green-700 transition-colors">📞 Hubungi Nadzar</a>
-                </div>
+                <p class="text-[11px] font-medium text-gray-500 dark:text-gray-400 mt-2 mb-6 leading-relaxed">
+                    Sebelum mengisi harap 
+                    <span onclick="document.getElementById('tabelBagian').scrollIntoView({behavior:'smooth'})" class="text-blue-600 dark:text-blue-400 font-bold cursor-pointer hover:underline decoration-2 underline-offset-4">Lihat Agenda</span> 
+                    atau 
+                    <a href="https://wa.me/6289685356850" target="_blank" class="text-green-600 dark:text-green-400 font-bold hover:underline decoration-2 underline-offset-4">Hubungi Nadzar</a>
+                </p>
 
-                <div class="flex items-center gap-2 mb-6">
-                    <div id="statusDot" class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                    <span class="text-[9px] font-bold uppercase tracking-widest opacity-40">Live Sync Enabled</span>
-                </div>
-
-                <div class="space-y-4">
+                <div class="space-y-4 mt-6 border-t border-gray-50 dark:border-gray-700 pt-6">
                     <input type="hidden" id="editId">
                     <div>
                         <label id="labelNama" class="text-[10px] font-bold uppercase ml-2 opacity-50">Nama Utama</label>
@@ -160,6 +148,12 @@
                         <input type="text" id="inputLokasi" placeholder="Nama Lokasi" class="w-full p-4 mt-1 mb-2 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none">
                         <textarea id="inputAlamat" placeholder="Detail Alamat" rows="2" class="w-full p-4 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none"></textarea>
                     </div>
+
+                    <div id="fieldRekanan">
+                        <label class="text-[10px] font-bold uppercase ml-2 text-orange-600">Rekanan / Fotografer (Handler)</label>
+                        <input type="text" id="inputRekanan" placeholder="Siapa yang handle job ini?" class="w-full p-4 mt-1 rounded-2xl border border-orange-100 dark:bg-gray-700 dark:border-orange-900/30 outline-none font-bold focus:border-orange-400">
+                    </div>
+
                     <button onclick="simpanData()" id="btnSimpan" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition uppercase text-[10px] tracking-widest shadow-lg shadow-blue-200 dark:shadow-none">Simpan Agenda</button>
                     <button onclick="cancelEdit()" id="btnCancelEdit" class="hidden w-full text-gray-400 font-bold py-2 text-[10px] uppercase">Batal Ubah</button>
                 </div>
@@ -182,7 +176,7 @@
                                 <th class="pb-4">Waktu</th>
                                 <th class="pb-4">Klien / Lokasi</th>
                                 <th class="pb-4">Paket</th>
-                                <th class="pb-4 admin-field text-center">Opsi</th>
+                                <th class="pb-4 text-center op-col" style="display:none">Opsi</th>
                             </tr>
                         </thead>
                         <tbody id="isiTabel" class="flex flex-col md:table-row-group gap-4"></tbody>
@@ -194,7 +188,7 @@
     </div>
 
     <script>
-        const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwEyM6S4oHQkU99oJOAh4A6zBD7gT61-5K4BGPesnrRhHwyLG03OqmKGXa2V4U6pmnXtg/exec";
+        const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxsQvw-oYDgRcuiK1SW7V3Czv_1yllErP1gKQhexSjG7J3-Gi8Yt9fE6NljKjTMgPGRHQ/exec";
         let currentMode = "", isAdmin = false, dataSimpanan = [];
 
         document.getElementById('themeToggle').onclick = () => {
@@ -220,6 +214,7 @@
             const todayTs = new Date(todayStr).getTime();
 
             const bulanIni = dataSimpanan.filter(d => {
+                if(!d.tgl) return false;
                 const dt = new Date(d.tgl);
                 return dt.getMonth() === now.getMonth() && dt.getFullYear() === now.getFullYear();
             });
@@ -234,27 +229,12 @@
                 document.getElementById('cdLabel').innerHTML = `<span class="w-2 h-2 rounded-full bg-red-400 animate-ping"></span> AGENDA HARI INI`;
                 const isiNama = jobsHariIni.map(j => {
                     const nm = j.tipe === 'Vendor' ? j.namaKlien : j.nama;
-                    return `<div class="mb-3"><span class="text-blue-200 text-[10px] font-bold">[${j.kat}]</span> <span class="uppercase">${nm}</span> <div class="text-[10px] opacity-60 font-normal italic mt-1 ml-1">📍 ${j.lokasi || '-'} | 🕒 ${j.jam || '-'}</div></div>`;
+                    const rkn = (j.rekanan && j.rekanan !== "-") ? `<div class="text-[9px] text-orange-400 font-bold mt-1">🤝 Handler: ${j.rekanan}</div>` : "";
+                    return `<div class="mb-3"><span class="text-blue-200 text-[10px] font-bold">[${j.kat}]</span> <span class="uppercase">${nm}</span> ${rkn} <div class="text-[10px] opacity-60 font-normal italic mt-1 ml-1">📍 ${j.lokasi || '-'} | 🕒 ${j.jam || '-'}</div></div>`;
                 }).join("");
                 document.getElementById('cdNama').innerHTML = isiNama;
-                
-                if(jobsMendatang.length > 0) {
-                    const targetTgl = jobsMendatang[0].tgl;
-                    const samaTanggal = jobsMendatang.filter(j => j.tgl === targetTgl);
-                    document.getElementById('nextScheduleBox').classList.remove('hidden');
-                    document.getElementById('nextDate').innerText = formatTanggalIndo(targetTgl);
-                    const isiNext = samaTanggal.map(j => {
-                        const nm = j.tipe === 'Vendor' ? j.namaKlien : j.nama;
-                        return `<div><div class="text-white font-bold text-xs truncate uppercase">${nm}</div><div class="text-[9px] text-blue-300 font-bold italic">${j.jam || '---'}</div></div>`;
-                    }).join("");
-                    document.getElementById('nextList').innerHTML = isiNext;
-                } else {
-                    document.getElementById('nextScheduleBox').classList.add('hidden');
-                }
-            } 
-            else if(jobsMendatang.length > 0) {
+            } else if(jobsMendatang.length > 0) {
                 document.getElementById('cdLabel').innerText = "📅 TARGET TERDEKAT";
-                document.getElementById('nextScheduleBox').classList.add('hidden');
                 const targetTgl = jobsMendatang[0].tgl;
                 const samaTanggal = jobsMendatang.filter(j => j.tgl === targetTgl);
                 const isiNama = samaTanggal.map(j => {
@@ -267,7 +247,21 @@
                 document.getElementById('cdNama').innerHTML = isiNama;
             } else {
                 document.getElementById('cdNama').innerText = "Agenda Kosong";
-                document.getElementById('nextScheduleBox').classList.add('hidden');
+            }
+
+            const box = document.getElementById('nextScheduleBox');
+            if(jobsHariIni.length > 0 && jobsMendatang.length > 0) {
+                box.classList.remove('hidden');
+                const targetTglNext = jobsMendatang[0].tgl;
+                const samaTanggalNext = jobsMendatang.filter(j => j.tgl === targetTglNext);
+                document.getElementById('nextDate').innerText = formatTanggalIndo(targetTglNext);
+                const isiNext = samaTanggalNext.map(j => {
+                    const nm = j.tipe === 'Vendor' ? j.namaKlien : j.nama;
+                    return `<div class="mb-2"><div class="text-white font-bold text-[10px] truncate uppercase">${nm}</div><div class="text-[8px] text-blue-300 font-bold italic">${j.jam || '---'}</div></div>`;
+                }).join("");
+                document.getElementById('nextList').innerHTML = isiNext;
+            } else {
+                box.classList.add('hidden');
             }
         }
 
@@ -278,6 +272,8 @@
             const filtered = dataSimpanan.filter(d => `${d.nama} ${d.namaKlien} ${d.lokasi} ${d.kat}`.toLowerCase().includes(keyword));
             const sorted = filtered.sort((a,b) => new Date(a.tgl || 0) - new Date(b.tgl || 0));
             document.getElementById('emptyState').classList.toggle('hidden', sorted.length > 0);
+
+            document.querySelectorAll('.op-col').forEach(el => el.style.display = isAdmin ? 'table-cell' : 'none');
 
             sorted.forEach(d => {
                 const isVendor = d.tipe === 'Vendor';
@@ -302,7 +298,7 @@
                 
                 if(isAdmin) {
                     const waLink = d.wa ? (d.wa.startsWith('0') ? '62' + d.wa.substring(1) : d.wa) : '';
-                    row += `<td class="md:py-5 text-center admin-field">
+                    row += `<td class="md:py-5 text-center">
                         <div class="flex gap-3 justify-start md:justify-center border-t md:border-t-0 border-gray-100 dark:border-gray-700 pt-3 md:pt-0">
                             <a href="https://wa.me/${waLink}" target="_blank" class="bg-green-500/10 text-green-600 w-9 h-9 flex items-center justify-center rounded-xl text-sm">📱</a>
                             <button onclick="editData(${d.id})" class="bg-blue-500/10 text-blue-600 w-9 h-9 flex items-center justify-center rounded-xl text-sm">✏️</button>
@@ -329,6 +325,7 @@
                 isAdmin = false;
                 document.getElementById('mainBody').classList.remove('is-admin');
                 document.getElementById('adminControls').classList.add('hidden');
+                document.getElementById('fieldRekanan').style.display = 'none';
                 document.getElementById('btnLock').innerText = "🔓";
                 updateBadge(); muatTabel();
             }
@@ -381,7 +378,8 @@
                 tipe: currentMode, nama: val('inputNama'),
                 namaKlien: currentMode === 'Vendor' ? val('inputNamaKlien') : "-",
                 kat: val('inputKategori'), tgl: val('inputTanggal'), jam: val('inputJam'),
-                wa: val('inputKontak'), lokasi: val('inputLokasi'), alamat: val('inputAlamat')
+                wa: val('inputKontak'), lokasi: val('inputLokasi'), alamat: val('inputAlamat'),
+                rekanan: val('inputRekanan') || "-"
             };
             const idx = dataSimpanan.findIndex(i => i.id == obj.id);
             if(idx > -1) dataSimpanan[idx] = obj; else dataSimpanan.push(obj);
@@ -399,6 +397,7 @@
             currentMode = item.tipe || 'Pribadi';
             aturPilihanPaket(currentMode);
             updateBadge();
+            document.getElementById('fieldRekanan').style.display = 'block';
             document.getElementById('editId').value = item.id;
             document.getElementById('inputNama').value = item.nama;
             document.getElementById('inputJam').value = item.jam;
@@ -406,6 +405,7 @@
             document.getElementById('inputKontak').value = item.wa;
             document.getElementById('inputLokasi').value = item.lokasi;
             document.getElementById('inputAlamat').value = item.alamat;
+            document.getElementById('inputRekanan').value = item.rekanan === "-" ? "" : item.rekanan;
             setTimeout(() => { document.getElementById('inputKategori').value = item.kat; }, 10);
             if(currentMode === 'Vendor') document.getElementById('inputNamaKlien').value = item.namaKlien;
             document.getElementById('btnSimpan').innerText = "Update Agenda";
@@ -416,8 +416,9 @@
         function cancelEdit() {
             document.getElementById('editId').value = '';
             document.getElementById('btnSimpan').innerText = "Simpan Agenda";
-            ['inputNama', 'inputNamaKlien', 'inputTanggal', 'inputJam', 'inputKontak', 'inputLokasi', 'inputAlamat'].forEach(i => document.getElementById(i).value = '');
+            ['inputNama', 'inputNamaKlien', 'inputTanggal', 'inputJam', 'inputKontak', 'inputLokasi', 'inputAlamat', 'inputRekanan'].forEach(i => document.getElementById(i).value = '');
             document.getElementById('btnCancelEdit').classList.add('hidden');
+            document.getElementById('fieldRekanan').style.display = 'none';
             aturPilihanPaket(currentMode);
         }
 
