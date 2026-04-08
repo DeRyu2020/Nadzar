@@ -7,15 +7,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
+        tailwind.config = { darkMode: 'class' }
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background-color 0.3s, color 0.3s; scroll-behavior: smooth; }
-        .admin-only { display: none; }
-        .is-admin .admin-only { display: block; }
+        .admin-only { display: none !important; }
+        .is-admin .admin-only { display: block !important; }
+        .is-admin .admin-only-flex { display: flex !important; }
         #fieldRekanan { display: none; }
         .is-admin #badgeMode { background-color: #EF4444 !important; color: white !important; }
         .loader-ring {
@@ -25,6 +24,7 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        .tab-active { border-bottom: 3px solid #2563EB; color: #2563EB; font-weight: 800; }
     </style>
 </head>
 <body id="mainBody" class="bg-[#F8FAFC] dark:bg-gray-900 text-gray-800 dark:text-gray-100 overflow-x-hidden text-sm">
@@ -35,6 +35,234 @@
             <h3 class="text-blue-600 dark:text-blue-400 font-extrabold tracking-[0.3em] text-[10px] uppercase animate-pulse">Nadzar Cloud Syncing</h3>
         </div>
     </div>
+
+    <div id="selectionScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-blue-600 dark:bg-blue-900 text-center px-6">
+        <div class="max-w-md w-full">
+            <h1 class="text-5xl font-extrabold mb-2 italic tracking-tight text-white uppercase">Nadzar</h1>
+            <p class="mb-10 opacity-70 tracking-[0.3em] uppercase text-[10px] font-bold text-white">Automated Cloud System</p>
+            <div class="flex flex-col gap-4">
+                <button onclick="openApp('Pribadi')" class="group bg-white text-blue-600 p-6 rounded-[2rem] shadow-2xl hover:scale-105 transition-all">
+                    <div class="text-3xl mb-1">👤</div>
+                    <div class="text-sm font-black uppercase tracking-widest text-blue-700">Input Klien</div>
+                </button>
+                <button onclick="openApp('Vendor')" class="group bg-blue-500 text-white p-6 rounded-[2rem] shadow-2xl hover:scale-105 border-2 border-blue-400 transition-all">
+                    <div class="text-3xl mb-1">💄</div>
+                    <div class="text-sm font-black uppercase tracking-widest">Input MUA</div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainContent" class="hidden opacity-0 transition-all duration-700 container mx-auto p-4 md:p-10 max-w-7xl">
+        
+        <div class="flex justify-between items-start mb-8">
+            <div>
+                <div id="badgeMode" class="bg-blue-100 text-blue-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block italic border border-blue-200 tracking-tighter shadow-sm">MEMUAT AKSES...</div>
+                <h1 class="text-3xl font-extrabold text-[#2563EB] tracking-tight">Nadzar Photowork</h1>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="toggleAdmin()" id="btnLock" title="Akses Admin" class="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-md border border-gray-100 dark:border-gray-700 text-lg hover:bg-yellow-50 transition-colors">🔓</button>
+                <button id="themeToggle" class="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-md border border-gray-100 dark:border-gray-700 transition-colors">🌙</button>
+            </div>
+        </div>
+
+        <div class="admin-only mb-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div class="lg:col-span-2 bg-gradient-to-br from-blue-700 to-indigo-900 text-white p-6 md:p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden min-h-[240px]">
+                    <div class="relative z-10 flex flex-col md:flex-row justify-between gap-6 h-full">
+                        <div class="flex-1 flex flex-col">
+                            <h3 id="cdLabel" class="text-[9px] font-bold uppercase tracking-[0.2em] text-blue-200 mb-3 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-blue-300 animate-ping"></span> Target Utama
+                            </h3>
+                            <div id="cdNama" class="overflow-y-auto custom-scroll max-h-[160px] pr-2 flex flex-col gap-2">
+                                Memuat Agenda...
+                            </div>
+                        </div>
+                        <div id="nextScheduleBox" class="flex-1 bg-white/10 backdrop-blur-md rounded-3xl p-5 border border-white/10 hidden md:flex flex-col">
+                            <h4 class="text-[8px] font-black uppercase tracking-widest text-blue-300 mb-2 flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span> Jadwal Selanjutnya
+                            </h4>
+                            <div id="nextDate" class="text-xs font-black text-white mb-4 tracking-wider">---</div>
+                            <div id="nextList" class="flex-1 overflow-y-auto custom-scroll pr-2 space-y-3"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-[2.5rem] shadow-xl border border-gray-50 dark:border-gray-700 flex flex-col justify-center">
+                    <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] opacity-30 mb-4 text-center lg:text-left">Ringkasan Job Bulan Ini</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="border-r border-gray-100 dark:border-gray-700 text-center">
+                            <div id="statTotal" class="text-4xl font-black text-blue-600 leading-none">0</div>
+                            <div class="text-[8px] font-bold uppercase mt-1 text-blue-400">Total Job</div>
+                        </div>
+                        <div class="pl-2 text-center">
+                            <div id="statVendor" class="text-4xl font-black text-purple-600 leading-none">0</div>
+                            <div class="text-[8px] font-bold uppercase mt-1 text-purple-400">MUA Job</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-only admin-only-flex flex gap-6 mb-6 border-b border-gray-100 dark:border-gray-800 px-4">
+            <button onclick="switchTab('agenda')" id="tabAgenda" class="pb-3 text-[11px] uppercase tracking-widest tab-active transition-all">Agenda & Input</button>
+            <button onclick="switchTab('paket')" id="tabPaket" class="pb-3 text-[11px] uppercase tracking-widest text-gray-400 transition-all">Master Paket</button>
+        </div>
+
+        <div id="contentAgenda" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div id="formSection" class="lg:col-span-4 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border border-gray-50 dark:border-gray-700 h-fit">
+                <h2 id="formTitle" class="text-xl font-black mb-1 italic tracking-tight text-blue-600 uppercase">ISI DATA</h2>
+                <div class="space-y-4 mt-6 border-t border-gray-50 dark:border-gray-700 pt-6">
+                    <input type="hidden" id="editId">
+                    <div>
+                        <label id="labelNama" class="text-[10px] font-bold uppercase ml-2 opacity-50">Nama Utama</label>
+                        <input type="text" id="inputNama" class="w-full p-4 mt-1 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none font-bold focus:border-blue-300">
+                    </div>
+                    <div id="containerNamaKlien" class="hidden">
+                        <label class="text-[10px] font-bold uppercase ml-2 opacity-50 text-purple-600">Nama Klien (MUA)</label>
+                        <input type="text" id="inputNamaKlien" class="w-full p-4 mt-1 rounded-2xl border border-purple-50 dark:bg-gray-700 dark:border-gray-600 outline-none font-bold focus:border-purple-300">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs font-bold">
+                        <div>
+                            <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Paket</label>
+                            <select id="inputKategori" class="w-full p-4 mt-1 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none"></select>
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Tanggal</label>
+                            <input type="date" id="inputTanggal" class="w-full p-4 mt-1 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Waktu Acara</label>
+                        <input type="text" id="inputJam" placeholder="Contoh: 08:00 WIB" class="w-full p-4 mt-1 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none font-medium">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Kontak WhatsApp</label>
+                        <input type="text" id="inputKontak" placeholder="08..." class="w-full p-4 mt-1 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Lokasi / Alamat</label>
+                        <input type="text" id="inputLokasi" placeholder="Nama Lokasi" class="w-full p-4 mt-1 mb-2 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none">
+                        <textarea id="inputAlamat" placeholder="Detail Alamat" rows="2" class="w-full p-4 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none"></textarea>
+                    </div>
+                    <div id="fieldRekanan">
+                        <label class="text-[10px] font-bold uppercase ml-2 text-orange-600">Rekanan / Fotografer (Handled)</label>
+                        <input type="text" id="inputRekanan" placeholder="Siapa yang handle job ini?" class="w-full p-4 mt-1 rounded-2xl border border-orange-100 dark:bg-gray-700 dark:border-orange-900/30 outline-none font-bold focus:border-orange-400">
+                    </div>
+                    <button onclick="simpanData()" id="btnSimpan" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition uppercase text-[10px] tracking-widest shadow-lg shadow-blue-200 dark:shadow-none">Simpan Agenda</button>
+                    <button onclick="cancelEdit()" id="btnCancelEdit" class="hidden w-full text-gray-400 font-bold py-2 text-[10px] uppercase">Batal Ubah</button>
+                </div>
+            </div>
+
+            <div id="tabelBagian" class="lg:col-span-8 bg-white dark:bg-gray-800 p-5 md:p-8 rounded-[2.5rem] shadow-xl border border-gray-50 dark:border-gray-700 overflow-hidden">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                    <h2 class="text-xl font-black italic tracking-tight text-blue-600 uppercase">Daftar Agenda</h2>
+                    <div id="adminControls" class="hidden flex flex-wrap gap-2 justify-center w-full md:w-auto">
+                        <input type="text" id="searchBar" onkeyup="muatTabel()" placeholder="Cari..." class="w-full md:w-48 p-2 rounded-xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 text-[10px] font-bold outline-none">
+                        <button onclick="tarikDataCloud()" class="bg-orange-50 text-orange-600 px-4 py-2 rounded-xl text-[9px] font-bold uppercase transition-colors">Sync</button>
+                        <button onclick="eksporExcel()" class="bg-green-50 text-green-600 px-4 py-2 rounded-xl text-[9px] font-bold uppercase transition-colors">Excel</button>
+                    </div>
+                </div>
+                <div class="min-h-[400px]">
+                    <table class="w-full text-left" id="tabelUtama">
+                        <thead class="hidden md:table-header-group">
+                            <tr class="text-gray-400 border-b border-gray-50 dark:border-gray-800 text-[9px] uppercase font-black tracking-[0.2em]">
+                                <th class="pb-4">Waktu</th>
+                                <th class="pb-4">Klien / Lokasi</th>
+                                <th id="thHandled" class="pb-4" style="display:none">Handled</th>
+                                <th class="pb-4 text-center op-col" style="display:none">Opsi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="isiTabel" class="flex flex-col md:table-row-group gap-4"></tbody>
+                    </table>
+                    <div id="emptyState" class="py-20 text-center opacity-10 italic font-bold text-[10px] uppercase tracking-[0.5em]">No Data</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="contentPaket" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div class="lg:col-span-4 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border border-gray-50 dark:border-gray-700 h-fit">
+                <h2 class="text-xl font-black mb-1 italic tracking-tight text-blue-600 uppercase">KELOLA PAKET</h2>
+                <div class="space-y-4 mt-6 border-t border-gray-50 dark:border-gray-700 pt-6">
+                    <input type="hidden" id="editPaketId">
+                    <div>
+                        <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Nama Paket</label>
+                        <input type="text" id="inputNamaPaket" placeholder="Contoh: Wedding Gold" class="w-full p-4 mt-1 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none font-bold">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Harga (Rp)</label>
+                        <input type="number" id="inputHargaPaket" placeholder="1500000" class="w-full p-4 mt-1 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none font-bold">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Rincian / Keterangan</label>
+                        <textarea id="inputKetPaket" rows="4" placeholder="Apa saja yang didapat klien?" class="w-full p-4 mt-1 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none"></textarea>
+                    </div>
+                    <button onclick="simpanPaket()" id="btnSimpanPaket" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition uppercase text-[10px] tracking-widest">Simpan Paket</button>
+                    <button onclick="batalEditPaket()" id="btnBatalPaket" class="hidden w-full text-gray-400 font-bold py-2 text-[10px] uppercase">Batal</button>
+                </div>
+            </div>
+
+            <div class="lg:col-span-8 bg-white dark:bg-gray-800 p-5 md:p-8 rounded-[2.5rem] shadow-xl border border-gray-50 dark:border-gray-700">
+                <h2 class="text-xl font-black italic tracking-tight text-blue-600 uppercase mb-6">Daftar Paket Global</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="listPaketContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxsQvw-oYDgRcuiK1SW7V3Czv_1yllErP1gKQhexSjG7J3-Gi8Yt9fE6NljKjTMgPGRHQ/exec";
+        let currentMode = "", isAdmin = false;
+        let dataSimpanan = []; 
+        let dataPaket = [];
+
+        document.getElementById('themeToggle').onclick = () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            document.getElementById('themeToggle').innerText = isDark ? '☀️' : '🌙';
+        };
+
+        async function openApp(mode) {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            await tarikDataCloud(true);
+            document.getElementById('selectionScreen').style.display = 'none';
+            document.getElementById('mainContent').classList.remove('hidden');
+            setTimeout(() => document.getElementById('mainContent').classList.add('opacity-100'), 50);
+            currentMode = mode;
+            updateBadge(); 
+            aturPilihanPaket();
+            muatTabel();
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        function switchTab(tab) {
+            const tabs = { agenda: 'contentAgenda', paket: 'contentPaket' };
+            Object.keys(tabs).forEach(k => {
+                document.getElementById(tabs[k]).classList.add('hidden');
+                document.getElementById('tab' + k.charAt(0).toUpperCase() + k.slice(1)).classList.remove('tab-active', 'text-gray-400');
+                document.getElementById('tab' + k.charAt(0).toUpperCase() + k.slice(1)).classList.add('text-gray-400');
+            });
+            document.getElementById(tabs[tab]).classList.remove('hidden');
+            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('tab-active');
+            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.remove('text-gray-400');
+            if(tab === 'paket') muatDaftarPaket();
+        }
+
+        // --- MANAJEMEN PAKET (GLOBAL) ---
+        function muatDaftarPaket() {
+            const container = document.getElementById('listPaketContainer');
+            container.innerHTML = '';
+            dataPaket.forEach(p => {
+                container.insertAdjacentHTML('beforeend', `
+                    <div class="p-5 rounded-3xl border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[8px] font-black uppercase px-2 py-1 rounded-full bg-blue-100 text-blue-600">Global Package</span>
+                            <div class="flex gap-2">
+                                <button onclick="editPaket(${p.id})" class="text-blue-500 text-xs">✏️</button>
+                                <button onclick="hapusPaket(${p.id})" class="text-red-500 text-xs">🗑️</button>
+                            </div>
+                        </div>
+                        <h4 class="font-black uppercase text-gray-800 dark:text-white">${p.nama}</h4>
+                        <div class="text-blue-600 font-bold text-xs mt-1">Rp ${Number(p.harga).toLocaleString('id-ID')}</div>
+                </div>
 
     <div id="selectionScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-blue-600 dark:bg-blue-900 text-center px-6">
         <div class="max-w-md w-full">
