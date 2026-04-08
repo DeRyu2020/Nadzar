@@ -3,507 +3,407 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nadzar Photowork - Cloud System</title>
+    <title>Nadzar Photowork - Cloud v4.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script>
-        tailwind.config = { darkMode: 'class' }
-    </script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: background-color 0.3s, color 0.3s; scroll-behavior: smooth; }
-        .admin-only { display: none !important; }
-        .is-admin .admin-only { display: block !important; }
-        .is-admin .admin-only-flex { display: flex !important; }
-        #fieldRekanan { display: none; }
-        .is-admin #badgeMode { background-color: #EF4444 !important; color: white !important; }
-        .loader-ring {
-            border: 3px solid rgba(37, 99, 235, 0.1); border-top: 3px solid #2563EB;
-            border-radius: 50%; width: 40px; height: 40px; animation: spin 0.8s linear infinite;
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s; }
+        .admin-only { display: none; }
+        .is-admin .admin-only { display: block; }
+        .loader-ring { border: 3px solid rgba(37, 99, 235, 0.1); border-top: 3px solid #2563EB; border-radius: 50%; width: 40px; height: 40px; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
-        .tab-active { border-bottom: 3px solid #2563EB; color: #2563EB; font-weight: 800; }
+        .glass-box { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
     </style>
 </head>
-<body id="mainBody" class="bg-[#F8FAFC] dark:bg-gray-900 text-gray-800 dark:text-gray-100 overflow-x-hidden text-sm">
+<body id="mainBody" class="bg-[#F8FAFC] dark:bg-gray-900 text-gray-800 dark:text-gray-100 text-sm">
 
     <div id="loadingOverlay" class="fixed inset-0 z-[100] bg-white/95 dark:bg-gray-900/95 flex items-center justify-center hidden backdrop-blur-sm">
-        <div class="flex flex-col items-center">
-            <div class="loader-ring mb-4"></div>
-            <h3 class="text-blue-600 dark:text-blue-400 font-extrabold tracking-[0.3em] text-[10px] uppercase animate-pulse">Nadzar Cloud Syncing</h3>
-        </div>
+        <div class="loader-ring"></div>
     </div>
 
-    <div id="selectionScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-blue-600 dark:bg-blue-900 text-center px-6">
+    <div id="selectionScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-blue-600 text-center px-6 text-white">
         <div class="max-w-md w-full">
-            <h1 class="text-5xl font-extrabold mb-2 italic tracking-tight text-white uppercase">Nadzar</h1>
-            <p class="mb-10 opacity-70 tracking-[0.3em] uppercase text-[10px] font-bold text-white">Automated Cloud System</p>
+            <h1 class="text-5xl font-extrabold mb-2 italic uppercase">Nadzar</h1>
+            <p class="mb-10 opacity-70 tracking-[0.3em] uppercase text-[10px] font-bold">Automated Cloud System</p>
             <div class="flex flex-col gap-4">
-                <button onclick="openApp('Pribadi')" class="group bg-white text-blue-600 p-6 rounded-[2rem] shadow-2xl hover:scale-105 transition-all">
-                    <div class="text-3xl mb-1">👤</div>
-                    <div class="text-sm font-black uppercase tracking-widest text-blue-700">Input Klien</div>
-                </button>
-                <button onclick="openApp('Vendor')" class="group bg-blue-500 text-white p-6 rounded-[2rem] shadow-2xl hover:scale-105 border-2 border-blue-400 transition-all">
-                    <div class="text-3xl mb-1">💄</div>
-                    <div class="text-sm font-black uppercase tracking-widest">Input MUA</div>
-                </button>
+                <button onclick="openApp('Pribadi')" class="bg-white text-blue-600 p-6 rounded-[2rem] font-black uppercase tracking-widest hover:scale-105 transition shadow-2xl">👤 Input Klien</button>
+                <button onclick="openApp('Vendor')" class="bg-blue-500 text-white p-6 rounded-[2rem] border-2 border-blue-400 font-black uppercase tracking-widest hover:scale-105 transition shadow-2xl">💄 Input MUA</button>
             </div>
+            <p class="mt-8 text-[9px] opacity-50 tracking-widest font-bold">NADZAR PHOTOWORK © 2026</p>
         </div>
     </div>
 
     <div id="mainContent" class="hidden opacity-0 transition-all duration-700 container mx-auto p-4 md:p-10 max-w-7xl">
-        
         <div class="flex justify-between items-start mb-8">
             <div>
-                <div id="badgeMode" class="bg-blue-100 text-blue-600 text-[10px] font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block italic border border-blue-200 tracking-tighter shadow-sm">MEMUAT AKSES...</div>
-                <h1 class="text-3xl font-extrabold text-[#2563EB] tracking-tight">Nadzar Photowork</h1>
+                <div id="badgeMode" class="bg-blue-100 text-blue-600 text-[9px] font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block">LOADING...</div>
+                <h1 class="text-3xl font-extrabold text-[#2563EB] tracking-tighter">Nadzar Photowork</h1>
             </div>
             <div class="flex gap-2">
-                <button onclick="toggleAdmin()" id="btnLock" title="Akses Admin" class="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-md border border-gray-100 dark:border-gray-700 text-lg hover:bg-yellow-50 transition-colors">🔓</button>
-                <button id="themeToggle" class="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-md border border-gray-100 dark:border-gray-700 transition-colors">🌙</button>
+                <button onclick="toggleAdmin()" id="btnLock" class="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-md text-lg hover:scale-110 transition">🔓</button>
+                <button id="themeToggle" class="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-md hover:scale-110 transition">🌙</button>
             </div>
         </div>
 
-        <div class="admin-only mb-8">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div class="lg:col-span-2 bg-gradient-to-br from-blue-700 to-indigo-900 text-white p-6 md:p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden min-h-[240px]">
-                    <div class="relative z-10 flex flex-col md:flex-row justify-between gap-6 h-full">
-                        <div class="flex-1 flex flex-col">
-                            <h3 id="cdLabel" class="text-[9px] font-bold uppercase tracking-[0.2em] text-blue-200 mb-3 flex items-center gap-2">
-                                <span class="w-2 h-2 rounded-full bg-blue-300 animate-ping"></span> Target Utama
-                            </h3>
-                            <div id="cdNama" class="overflow-y-auto custom-scroll max-h-[160px] pr-2 flex flex-col gap-2">
-                                Memuat Agenda...
+        <div class="admin-only mb-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-8 bg-gradient-to-br from-blue-700 to-indigo-900 text-white p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden flex flex-col md:flex-row gap-6 min-h-[320px]">
+                    <div class="flex-1 z-10">
+                        <h3 class="text-[9px] font-black uppercase tracking-[0.3em] text-blue-200 mb-6 flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-blue-300 animate-ping"></span> AGENDA HARI INI
+                        </h3>
+                        <div id="agendaHariIniList" class="space-y-4 overflow-y-auto max-h-[200px] custom-scroll pr-4"></div>
+                    </div>
+                    <div class="w-full md:w-72 glass-box rounded-[1.5rem] p-6 z-10">
+                        <h3 class="text-[8px] font-black uppercase tracking-widest text-blue-300 mb-4">JADWAL SELANJUTNYA</h3>
+                        <div id="nextList" class="space-y-4 overflow-y-auto max-h-[180px] custom-scroll pr-2"></div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-4 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border dark:border-gray-700 flex flex-col justify-center text-center">
+                    <h3 class="text-[10px] font-extrabold uppercase tracking-[0.2em] text-gray-400 mb-6">RINGKASAN JOB BULAN INI</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="border-r dark:border-gray-700">
+                            <div id="statTotal" class="text-5xl font-black text-blue-600">0</div>
+                            <div class="text-[9px] font-bold text-blue-400 uppercase mt-2 tracking-widest">TOTAL JOB</div>
+                        </div>
+                        <div>
+                            <div id="statVendor" class="text-5xl font-black text-purple-600">0</div>
+                            <div class="text-[9px] font-bold text-purple-400 uppercase mt-2 tracking-widest">MUA JOB</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-6 border-b border-gray-200 dark:border-gray-700 flex gap-6">
+            <button onclick="switchTab('agenda')" id="tab-agenda" class="border-b-2 border-blue-600 pb-2 text-[10px] font-black uppercase tracking-widest">📅 Agenda</button>
+            <button onclick="switchTab('paket')" id="tab-paket" class="hidden pb-2 text-[10px] font-black uppercase tracking-widest opacity-40">🏷️ Master Paket</button>
+        </div>
+
+        <div id="section-agenda">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div id="formContainer" class="lg:col-span-4 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border dark:border-gray-700 h-fit">
+                    <h2 id="formTitle" class="text-xl font-black mb-6 text-blue-600 uppercase italic">Input Data</h2>
+                    <div class="space-y-4">
+                        <input type="hidden" id="editId">
+                        <input type="text" id="inputNama" placeholder="Nama Utama" class="w-full p-4 rounded-2xl border dark:bg-gray-700 dark:border-gray-600 font-bold outline-none focus:ring-2 focus:ring-blue-500">
+                        <div id="containerNamaKlien" class="hidden"><input type="text" id="inputNamaKlien" placeholder="Nama Klien (MUA)" class="w-full p-4 rounded-2xl border border-purple-100 dark:bg-gray-700 font-bold italic"></div>
+                        
+                        <div class="space-y-2">
+                            <div class="grid grid-cols-2 gap-2">
+                                <select id="inputKategori" onchange="autoFillHarga()" class="p-4 rounded-2xl border dark:bg-gray-700 font-bold outline-none"></select>
+                                <input type="date" id="inputTanggal" class="p-4 rounded-2xl border dark:bg-gray-700 outline-none">
+                            </div>
+                            <div id="infoHargaTampil" class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl border border-blue-100 dark:border-blue-800 flex justify-between items-center">
+                                <span class="text-[9px] font-bold opacity-50 uppercase tracking-widest">Estimasi Harga:</span>
+                                <span id="textHargaDisplay" class="text-xs font-black text-blue-600 dark:text-blue-400 italic">Rp 0</span>
                             </div>
                         </div>
-                        <div id="nextScheduleBox" class="flex-1 bg-white/10 backdrop-blur-md rounded-3xl p-5 border border-white/10 hidden md:flex flex-col">
-                            <h4 class="text-[8px] font-black uppercase tracking-widest text-blue-300 mb-2 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span> Jadwal Selanjutnya
-                            </h4>
-                            <div id="nextDate" class="text-xs font-black text-white mb-4 tracking-wider">---</div>
-                            <div id="nextList" class="flex-1 overflow-y-auto custom-scroll pr-2 space-y-3"></div>
+
+                        <div class="admin-only"><input type="number" id="inputHarga" placeholder="Harga IDR" class="w-full p-4 rounded-2xl border border-green-100 dark:bg-gray-700 font-bold"></div>
+                        <input type="text" id="inputJam" placeholder="Jam" class="w-full p-4 rounded-2xl border dark:bg-gray-700">
+                        <input type="text" id="inputKontak" placeholder="WhatsApp (Contoh: 0812...)" class="w-full p-4 rounded-2xl border dark:bg-gray-700">
+                        <input type="text" id="inputLokasi" placeholder="Lokasi" class="w-full p-4 rounded-2xl border dark:bg-gray-700">
+                        <textarea id="inputAlamat" placeholder="Alamat Lengkap" class="w-full p-4 rounded-2xl border dark:bg-gray-700"></textarea>
+                        <div id="fieldRekanan" class="admin-only"><input type="text" id="inputRekanan" placeholder="Handler Fotografer" class="w-full p-4 rounded-2xl border border-orange-100 dark:bg-gray-700 font-bold"></div>
+                        
+                        <div class="pt-2 flex flex-col gap-2">
+                            <button onclick="simpanData()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl uppercase text-[10px] tracking-widest shadow-lg transition active:scale-95">Simpan Agenda</button>
+                            <button id="btnBatal" onclick="bersihkanForm()" class="hidden w-full bg-red-50 text-red-600 font-bold py-3 rounded-2xl uppercase text-[9px] tracking-widest border border-red-100">Batal Ubah</button>
                         </div>
                     </div>
                 </div>
 
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-[2.5rem] shadow-xl border border-gray-50 dark:border-gray-700 flex flex-col justify-center">
-                    <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] opacity-30 mb-4 text-center lg:text-left">Ringkasan Job Bulan Ini</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="border-r border-gray-100 dark:border-gray-700 text-center">
-                            <div id="statTotal" class="text-4xl font-black text-blue-600 leading-none">0</div>
-                            <div class="text-[8px] font-bold uppercase mt-1 text-blue-400">Total Job</div>
+                <div class="lg:col-span-8 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border dark:border-gray-700 min-h-[500px]">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+                        <h2 class="text-xl font-black text-blue-600 uppercase italic tracking-tighter">Daftar Agenda</h2>
+                        <div class="relative w-full md:w-64">
+                            <input type="text" id="searchInput" onkeyup="cariAgenda()" placeholder="Cari nama/mua/lokasi..." class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-700 border-none text-[11px] font-bold focus:ring-2 focus:ring-blue-500 outline-none">
+                            <span class="absolute left-3 top-2.5 opacity-30">🔍</span>
                         </div>
-                        <div class="pl-2 text-center">
-                            <div id="statVendor" class="text-4xl font-black text-purple-600 leading-none">0</div>
-                            <div class="text-[8px] font-bold uppercase mt-1 text-purple-400">MUA Job</div>
-                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-separate border-spacing-y-2">
+                            <tbody id="isiTabel"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="admin-only admin-only-flex flex gap-6 mb-6 border-b border-gray-100 dark:border-gray-800 px-4">
-            <button onclick="switchTab('agenda')" id="tabAgenda" class="pb-3 text-[11px] uppercase tracking-widest tab-active transition-all">Agenda & Input</button>
-            <button onclick="switchTab('paket')" id="tabPaket" class="pb-3 text-[11px] uppercase tracking-widest text-gray-400 transition-all">Master Paket</button>
-        </div>
-
-        <div id="contentAgenda" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div id="formSection" class="lg:col-span-4 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border border-gray-50 dark:border-gray-700 h-fit">
-                <h2 id="formTitle" class="text-xl font-black mb-1 italic tracking-tight text-blue-600 uppercase">ISI DATA</h2>
-                <div class="space-y-4 mt-6 border-t border-gray-50 dark:border-gray-700 pt-6">
-                    <input type="hidden" id="editId">
-                    <div>
-                        <label id="labelNama" class="text-[10px] font-bold uppercase ml-2 opacity-50">Nama Utama</label>
-                        <input type="text" id="inputNama" class="w-full p-4 mt-1 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none font-bold focus:border-blue-300">
-                    </div>
-                    <div id="containerNamaKlien" class="hidden">
-                        <label class="text-[10px] font-bold uppercase ml-2 opacity-50 text-purple-600">Nama Klien (MUA)</label>
-                        <input type="text" id="inputNamaKlien" class="w-full p-4 mt-1 rounded-2xl border border-purple-50 dark:bg-gray-700 dark:border-gray-600 outline-none font-bold focus:border-purple-300">
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 text-xs font-bold">
-                        <div>
-                            <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Paket</label>
-                            <select id="inputKategori" class="w-full p-4 mt-1 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none"></select>
-                        </div>
-                        <div>
-                            <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Tanggal</label>
-                            <input type="date" id="inputTanggal" class="w-full p-4 mt-1 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Waktu Acara</label>
-                        <input type="text" id="inputJam" placeholder="Contoh: 08:00 WIB" class="w-full p-4 mt-1 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none font-medium">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Kontak WhatsApp</label>
-                        <input type="text" id="inputKontak" placeholder="08..." class="w-full p-4 mt-1 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Lokasi / Alamat</label>
-                        <input type="text" id="inputLokasi" placeholder="Nama Lokasi" class="w-full p-4 mt-1 mb-2 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none">
-                        <textarea id="inputAlamat" placeholder="Detail Alamat" rows="2" class="w-full p-4 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none"></textarea>
-                    </div>
-                    <div id="fieldRekanan">
-                        <label class="text-[10px] font-bold uppercase ml-2 text-orange-600">Rekanan / Fotografer (Handled)</label>
-                        <input type="text" id="inputRekanan" placeholder="Siapa yang handle job ini?" class="w-full p-4 mt-1 rounded-2xl border border-orange-100 dark:bg-gray-700 dark:border-orange-900/30 outline-none font-bold focus:border-orange-400">
-                    </div>
-                    <button onclick="simpanData()" id="btnSimpan" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition uppercase text-[10px] tracking-widest shadow-lg shadow-blue-200 dark:shadow-none">Simpan Agenda</button>
-                    <button onclick="cancelEdit()" id="btnCancelEdit" class="hidden w-full text-gray-400 font-bold py-2 text-[10px] uppercase">Batal Ubah</button>
-                </div>
-            </div>
-
-            <div id="tabelBagian" class="lg:col-span-8 bg-white dark:bg-gray-800 p-5 md:p-8 rounded-[2.5rem] shadow-xl border border-gray-50 dark:border-gray-700 overflow-hidden">
-                <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-                    <h2 class="text-xl font-black italic tracking-tight text-blue-600 uppercase">Daftar Agenda</h2>
-                    <div id="adminControls" class="hidden flex flex-wrap gap-2 justify-center w-full md:w-auto">
-                        <input type="text" id="searchBar" onkeyup="muatTabel()" placeholder="Cari..." class="w-full md:w-48 p-2 rounded-xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 text-[10px] font-bold outline-none">
-                        <button onclick="tarikDataCloud()" class="bg-orange-50 text-orange-600 px-4 py-2 rounded-xl text-[9px] font-bold uppercase transition-colors">Sync</button>
-                        <button onclick="eksporExcel()" class="bg-green-50 text-green-600 px-4 py-2 rounded-xl text-[9px] font-bold uppercase transition-colors">Excel</button>
+        <div id="section-paket" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div class="lg:col-span-4 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] border border-blue-100 h-fit">
+                    <h2 class="text-xl font-black text-blue-600 uppercase italic">Master Paket</h2>
+                    <div class="space-y-4 mt-6">
+                        <input type="hidden" id="editIdPaket">
+                        <input type="text" id="p_nama" placeholder="Nama Paket" class="w-full p-4 rounded-2xl border dark:bg-gray-700 font-bold">
+                        <input type="number" id="p_harga" placeholder="Harga Default" class="w-full p-4 rounded-2xl border dark:bg-gray-700 font-bold">
+                        <textarea id="p_desc" placeholder="Keterangan Paket" class="w-full p-4 rounded-2xl border dark:bg-gray-700"></textarea>
+                        <button onclick="simpanPaket()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl uppercase text-[10px] tracking-widest">Simpan Paket</button>
                     </div>
                 </div>
-                <div class="min-h-[400px]">
-                    <table class="w-full text-left" id="tabelUtama">
-                        <thead class="hidden md:table-header-group">
-                            <tr class="text-gray-400 border-b border-gray-50 dark:border-gray-800 text-[9px] uppercase font-black tracking-[0.2em]">
-                                <th class="pb-4">Waktu</th>
-                                <th class="pb-4">Klien / Lokasi</th>
-                                <th id="thHandled" class="pb-4" style="display:none">Handled</th>
-                                <th class="pb-4 text-center op-col" style="display:none">Opsi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="isiTabel" class="flex flex-col md:table-row-group gap-4"></tbody>
-                    </table>
-                    <div id="emptyState" class="py-20 text-center opacity-10 italic font-bold text-[10px] uppercase tracking-[0.5em]">No Data</div>
+                <div class="lg:col-span-8 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border dark:border-gray-700">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-[10px] font-bold uppercase">
+                            <thead><tr class="opacity-30 border-b dark:border-gray-700"><th class="pb-4 text-left px-4">Paket</th><th class="pb-4 text-right px-4">Harga</th><th class="pb-4 text-center px-4">Aksi</th></tr></thead>
+                            <tbody id="isiTabelPaket"></tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        <div id="contentPaket" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div class="lg:col-span-4 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border border-gray-50 dark:border-gray-700 h-fit">
-                <h2 class="text-xl font-black mb-1 italic tracking-tight text-blue-600 uppercase">KELOLA PAKET</h2>
-                <div class="space-y-4 mt-6 border-t border-gray-50 dark:border-gray-700 pt-6">
-                    <input type="hidden" id="editPaketId">
-                    <div>
-                        <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Nama Paket</label>
-                        <input type="text" id="inputNamaPaket" placeholder="Contoh: Wedding Gold" class="w-full p-4 mt-1 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none font-bold">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Harga (Rp)</label>
-                        <input type="number" id="inputHargaPaket" placeholder="1500000" class="w-full p-4 mt-1 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none font-bold">
-                    </div>
-                    <div>
-                        <label class="text-[10px] font-bold uppercase ml-2 opacity-50">Rincian / Keterangan</label>
-                        <textarea id="inputKetPaket" rows="4" placeholder="Apa saja yang didapat klien?" class="w-full p-4 mt-1 rounded-2xl border border-gray-100 dark:bg-gray-700 dark:border-gray-600 outline-none"></textarea>
-                    </div>
-                    <button onclick="simpanPaket()" id="btnSimpanPaket" class="w-full bg-blue-600 text-white font-bold py-4 rounded-2xl hover:bg-blue-700 transition uppercase text-[10px] tracking-widest">Simpan Paket</button>
-                    <button onclick="batalEditPaket()" id="btnBatalPaket" class="hidden w-full text-gray-400 font-bold py-2 text-[10px] uppercase">Batal</button>
-                </div>
-            </div>
-
-            <div class="lg:col-span-8 bg-white dark:bg-gray-800 p-5 md:p-8 rounded-[2.5rem] shadow-xl border border-gray-50 dark:border-gray-700">
-                <h2 class="text-xl font-black italic tracking-tight text-blue-600 uppercase mb-6">Daftar Paket Global</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="listPaketContainer"></div>
             </div>
         </div>
     </div>
 
     <script>
-        const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbxsQvw-oYDgRcuiK1SW7V3Czv_1yllErP1gKQhexSjG7J3-Gi8Yt9fE6NljKjTMgPGRHQ/exec";
-        let currentMode = "", isAdmin = false;
-        let dataSimpanan = []; 
-        let dataPaket = [];
-
-        document.getElementById('themeToggle').onclick = () => {
-            const isDark = document.documentElement.classList.toggle('dark');
-            document.getElementById('themeToggle').innerText = isDark ? '☀️' : '🌙';
-        };
+        const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbyUQB4oF5LRpn2iC3kvCZlZk4yy0u5LjbyRBGmy5ldt4wRI1n87zybB3ut_LlEEGhJKXA/exec";
+        let currentMode = "", isAdmin = false, dataSimpanan = [], dataPaket = [];
 
         async function openApp(mode) {
             document.getElementById('loadingOverlay').classList.remove('hidden');
-            await tarikDataCloud(true);
+            setAppMode(mode);
+            try {
+                await Promise.all([tarikDataCloud(), tarikPaketCloud()]);
+            } catch (e) { console.log("Init Error"); }
             document.getElementById('selectionScreen').style.display = 'none';
             document.getElementById('mainContent').classList.remove('hidden');
             setTimeout(() => document.getElementById('mainContent').classList.add('opacity-100'), 50);
-            currentMode = mode;
-            updateBadge(); 
-            aturPilihanPaket();
-            muatTabel();
+            updateBadge();
             document.getElementById('loadingOverlay').classList.add('hidden');
         }
 
-        function switchTab(tab) {
-            const tabs = { agenda: 'contentAgenda', paket: 'contentPaket' };
-            Object.keys(tabs).forEach(k => {
-                document.getElementById(tabs[k]).classList.add('hidden');
-                document.getElementById('tab' + k.charAt(0).toUpperCase() + k.slice(1)).classList.remove('tab-active', 'text-gray-400');
-                document.getElementById('tab' + k.charAt(0).toUpperCase() + k.slice(1)).classList.add('text-gray-400');
-            });
-            document.getElementById(tabs[tab]).classList.remove('hidden');
-            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('tab-active');
-            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.remove('text-gray-400');
-            if(tab === 'paket') muatDaftarPaket();
+        function setAppMode(mode) {
+            currentMode = mode;
+            document.getElementById('containerNamaKlien').classList.toggle('hidden', mode !== 'Vendor');
+            updateBadge();
         }
 
-        // --- MANAJEMEN PAKET (GLOBAL) ---
-        function muatDaftarPaket() {
-            const container = document.getElementById('listPaketContainer');
-            container.innerHTML = '';
-            dataPaket.forEach(p => {
-                container.insertAdjacentHTML('beforeend', `
-                    <div class="p-5 rounded-3xl border border-gray-100 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-[8px] font-black uppercase px-2 py-1 rounded-full bg-blue-100 text-blue-600">Global Package</span>
-                            <div class="flex gap-2">
-                                <button onclick="editPaket(${p.id})" class="text-blue-500 text-xs">✏️</button>
-                                <button onclick="hapusPaket(${p.id})" class="text-red-500 text-xs">🗑️</button>
-                            </div>
-                        </div>
-                        <h4 class="font-black uppercase text-gray-800 dark:text-white">${p.nama}</h4>
-                        <div class="text-blue-600 font-bold text-xs mt-1">Rp ${Number(p.harga).toLocaleString('id-ID')}</div>
-                        <p class="text-[10px] opacity-60 mt-2 italic leading-relaxed">${p.ket || '-'}</p>
-                    </div>
-                `);
-            });
+        async function tarikDataCloud() {
+            try {
+                const res = await fetch(URL_SCRIPT + "?sheet=Agenda&t=" + Date.now());
+                dataSimpanan = await res.json();
+                muatTabel(dataSimpanan);
+                updateHighlights();
+            } catch (e) { console.log("Agenda Fail"); }
         }
 
-        async function simpanPaket() {
-            const nama = document.getElementById('inputNamaPaket').value;
-            const harga = document.getElementById('inputHargaPaket').value;
-            const ket = document.getElementById('inputKetPaket').value;
-            const id = document.getElementById('editPaketId').value || Date.now();
-            if(!nama || !harga) return alert("Isi Nama & Harga!");
-            const newPaket = { id, nama, harga, ket, isPaket: true };
-            const idx = dataPaket.findIndex(p => p.id == id);
-            if(idx > -1) dataPaket[idx] = newPaket; else dataPaket.push(newPaket);
-            await kirimSemuaData();
-            batalEditPaket();
-            muatDaftarPaket();
-            aturPilihanPaket();
-        }
-
-        function editPaket(id) {
-            const p = dataPaket.find(x => x.id == id);
-            document.getElementById('editPaketId').value = p.id;
-            document.getElementById('inputNamaPaket').value = p.nama;
-            document.getElementById('inputHargaPaket').value = p.harga;
-            document.getElementById('inputKetPaket').value = p.ket;
-            document.getElementById('btnSimpanPaket').innerText = "Update Paket";
-            document.getElementById('btnBatalPaket').classList.remove('hidden');
-        }
-
-        function batalEditPaket() {
-            document.getElementById('editPaketId').value = '';
-            document.getElementById('inputNamaPaket').value = '';
-            document.getElementById('inputHargaPaket').value = '';
-            document.getElementById('inputKetPaket').value = '';
-            document.getElementById('btnSimpanPaket').innerText = "Simpan Paket";
-            document.getElementById('btnBatalPaket').classList.add('hidden');
-        }
-
-        async function hapusPaket(id) {
-            if(confirm("Hapus paket?")) {
-                dataPaket = dataPaket.filter(p => p.id != id);
-                await kirimSemuaData();
-                muatDaftarPaket();
+        async function tarikPaketCloud() {
+            try {
+                const res = await fetch(URL_SCRIPT + "?sheet=Paket&t=" + Date.now());
+                dataPaket = await res.json();
                 aturPilihanPaket();
-            }
+                renderTabelPaket();
+            } catch (e) { console.log("Paket Fail"); }
         }
 
-        // --- DASHBOARD & AGENDA ---
-        function updateStats() {
-            if(!isAdmin) return; 
+        function muatTabel(data) {
+            const container = document.getElementById('isiTabel');
+            container.innerHTML = '';
+            const sorted = data.sort((a,b) => new Date(a.tgl || 0) - new Date(b.tgl || 0));
+            
+            sorted.forEach(d => {
+                const waLink = d.wa ? `https://wa.me/${d.wa.replace(/^0/, '62')}` : '#';
+                const row = `
+                <tr class="bg-gray-50/50 dark:bg-gray-800/30 rounded-2xl overflow-hidden shadow-sm agenda-row">
+                    <td class="py-5 px-6 rounded-l-2xl">
+                        <div class="text-[9px] font-black text-blue-600 mb-1 tracking-tighter uppercase">${formatTanggalIndo(d.tgl)} | ${d.jam || '-'}</div>
+                        <div class="text-sm font-black uppercase text-gray-800 dark:text-white leading-tight">${d.tipe === 'Vendor' ? d.namaKlien : d.nama}</div>
+                        <div class="text-[9px] font-bold text-purple-600 dark:text-purple-400 uppercase mt-1">
+                            ${d.tipe === 'Vendor' ? 'MUA: ' + d.nama : 'Klien Pribadi'}
+                        </div>
+                        <div class="text-[9px] opacity-40 uppercase font-bold italic mt-1">📍 ${d.lokasi || '-'}</div>
+                        ${isAdmin ? `
+                            <div class="mt-2 pt-2 border-t dark:border-gray-700/50">
+                                <span class="text-[9px] bg-green-500/10 text-green-600 px-2 py-0.5 rounded font-black italic">💰 Rp ${parseInt(d.harga || 0).toLocaleString()}</span>
+                                <div class="text-[8px] text-orange-500 font-black mt-1 uppercase italic">📸 Handler: ${d.rekanan || '-'}</div>
+                            </div>
+                        ` : ''}
+                    </td>
+                    <td class="py-5 px-6 text-right rounded-r-2xl">
+                        <div class="flex justify-end gap-2">
+                            ${isAdmin ? `
+                                <a href="${waLink}" target="_blank" class="w-8 h-8 flex items-center justify-center bg-green-100 text-green-600 rounded-full">📞</a>
+                                <button onclick="editData(${d.id})" class="w-8 h-8 bg-blue-50 text-blue-600 rounded-full">✏️</button>
+                                <button onclick="hapusData(${d.id})" class="w-8 h-8 bg-red-50 text-red-600 rounded-full">🗑️</button>
+                            ` : `<span class="text-[9px] bg-white dark:bg-gray-700 px-3 py-1.5 rounded-xl font-black shadow-sm border border-blue-50 dark:border-gray-600">${d.jam || '-'}</span>`}
+                        </div>
+                    </td>
+                </tr>`;
+                container.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
+        function cariAgenda() {
+            const val = document.getElementById('searchInput').value.toLowerCase();
+            const filterData = dataSimpanan.filter(d => 
+                (d.nama || "").toLowerCase().includes(val) || 
+                (d.namaKlien || "").toLowerCase().includes(val) || 
+                (d.lokasi || "").toLowerCase().includes(val)
+            );
+            muatTabel(filterData);
+        }
+
+        function updateHighlights() {
             const now = new Date();
             const todayStr = now.toISOString().split('T')[0];
-            const bulanIni = dataSimpanan.filter(d => {
-                if(!d.tgl) return false;
-                const dt = new Date(d.tgl);
-                return dt.getMonth() === now.getMonth() && dt.getFullYear() === now.getFullYear();
-            });
+            const allSorted = dataSimpanan.filter(d => d.tgl).sort((a,b) => new Date(a.tgl) - new Date(b.tgl));
+            
+            const hariIni = allSorted.filter(d => d.tgl === todayStr);
+            const listHariIni = document.getElementById('agendaHariIniList');
+            listHariIni.innerHTML = hariIni.length > 0 ? hariIni.map(j => `
+                <div class="bg-white/10 p-4 rounded-2xl backdrop-blur-sm border border-white/5">
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="text-[10px] font-black text-blue-300 uppercase tracking-widest">${j.jam || '-'}</span>
+                        <span class="text-[8px] bg-white/20 px-2 py-0.5 rounded-full font-bold uppercase">${j.kat}</span>
+                    </div>
+                    <div class="text-sm font-black uppercase truncate">${j.tipe === 'Vendor' ? j.namaKlien : j.nama}</div>
+                    <div class="flex flex-col gap-0.5 mt-2">
+                        <div class="text-[9px] font-bold text-purple-300 uppercase">💄 MUA: ${j.tipe === 'Vendor' ? j.nama : 'Pribadi'}</div>
+                        <div class="text-[9px] font-black text-yellow-300 uppercase italic">📸 Handler: ${j.rekanan || 'Belum Ada'}</div>
+                    </div>
+                </div>`).join("") : `<div class="text-xs opacity-50 italic">Tidak ada agenda hari ini</div>`;
+
+            const mendatang = allSorted.filter(d => new Date(d.tgl) > now);
+            const nextList = document.getElementById('nextList');
+            nextList.innerHTML = mendatang.length > 0 ? mendatang.slice(0,5).map(m => `
+                <div class="border-b border-white/10 pb-3">
+                    <div class="text-[8px] font-black text-blue-300 uppercase mb-1">${formatTanggalIndo(m.tgl)} | ${m.jam || '-'}</div>
+                    <div class="text-[10px] font-extrabold uppercase truncate">${m.tipe === 'Vendor' ? m.namaKlien : m.nama}</div>
+                    <div class="text-[8px] opacity-70 uppercase mt-1">
+                        💄 ${m.tipe === 'Vendor' ? m.nama : 'Pribadi'} | 📸 ${m.rekanan || '-'}
+                    </div>
+                </div>`).join("") : `<div class="text-[10px] opacity-40 italic">Tidak ada jadwal terdekat</div>`;
+
+            const bulanIni = allSorted.filter(d => new Date(d.tgl).getMonth() === now.getMonth());
             document.getElementById('statTotal').innerText = bulanIni.length;
             document.getElementById('statVendor').innerText = bulanIni.filter(d => d.tipe === 'Vendor').length;
-            const allSorted = dataSimpanan.filter(d => d.tgl).sort((a,b) => new Date(a.tgl) - new Date(b.tgl));
-            const jobsHariIni = allSorted.filter(d => d.tgl === todayStr);
-            const jobsMendatang = allSorted.filter(d => new Date(d.tgl) > new Date(todayStr));
-
-            if(jobsHariIni.length > 0) {
-                document.getElementById('cdLabel').innerHTML = `<span class="w-2 h-2 rounded-full bg-red-400 animate-ping"></span> AGENDA HARI INI`;
-                document.getElementById('cdNama').innerHTML = jobsHariIni.map(j => `
-                    <div class="mb-1 border-b border-white/5 pb-2">
-                        <div class="flex items-center gap-2">
-                            <span class="text-blue-200 text-[10px] font-bold italic tracking-tighter">[${j.kat}]</span> 
-                            <span class="uppercase font-black text-lg leading-none">${j.tipe === 'Vendor' ? j.namaKlien : j.nama}</span>
-                        </div>
-                        <div class="text-[10px] opacity-70 italic mt-0.5">📍 ${j.lokasi || '-'} | 🕒 ${j.jam || '-'}</div>
-                    </div>`).join("");
-            } else if(jobsMendatang.length > 0) {
-                document.getElementById('cdLabel').innerText = "📅 TARGET TERDEKAT";
-                const targetTgl = jobsMendatang[0].tgl;
-                document.getElementById('cdNama').innerHTML = jobsMendatang.filter(j => j.tgl === targetTgl).map(j => `
-                    <div class="mb-2">
-                        <div class="text-[10px] font-bold text-blue-300 mb-0.5">${formatTanggalIndo(targetTgl)}</div>
-                        <span class="uppercase font-black text-lg leading-none">${j.tipe === 'Vendor' ? j.namaKlien : j.nama}</span>
-                    </div>`).join("");
-            } else { document.getElementById('cdNama').innerText = "Agenda Kosong"; }
-
-            const box = document.getElementById('nextScheduleBox');
-            if(jobsHariIni.length > 0 && jobsMendatang.length > 0) {
-                box.classList.remove('hidden');
-                document.getElementById('nextDate').innerText = formatTanggalIndo(jobsMendatang[0].tgl);
-                document.getElementById('nextList').innerHTML = jobsMendatang.filter(j => j.tgl === jobsMendatang[0].tgl).map(j => `
-                    <div class="mb-2"><div class="text-white font-bold text-[10px] truncate uppercase">${j.tipe === 'Vendor' ? j.namaKlien : j.nama}</div></div>`).join("");
-            } else { box.classList.add('hidden'); }
-        }
-
-        function muatTabel() {
-            const tabel = document.getElementById('isiTabel');
-            const keyword = document.getElementById('searchBar').value.toLowerCase();
-            tabel.innerHTML = '';
-            const filtered = dataSimpanan.filter(d => `${d.nama} ${d.namaKlien} ${d.lokasi} ${d.kat}`.toLowerCase().includes(keyword));
-            const sorted = filtered.sort((a,b) => new Date(a.tgl || 0) - new Date(b.tgl || 0));
-            document.getElementById('emptyState').classList.toggle('hidden', sorted.length > 0);
-            document.getElementById('thHandled').style.display = isAdmin ? 'table-cell' : 'none';
-            document.querySelectorAll('.op-col').forEach(el => el.style.display = isAdmin ? 'table-cell' : 'none');
-            sorted.forEach(d => {
-                const infoNama = d.tipe === 'Vendor' ? `<div class="text-purple-600 font-extrabold uppercase text-sm">${d.namaKlien}</div><div class="text-[9px] opacity-40 uppercase font-bold">MUA: ${d.nama}</div>` : `<div class="font-black text-gray-800 dark:text-white uppercase text-sm">${d.nama}</div>`;
-                let row = `<tr class="flex flex-col md:table-row bg-gray-50/50 dark:bg-gray-700/20 md:bg-transparent rounded-2xl p-4 md:p-0 md:border-b border-gray-50 dark:border-gray-800 hover:bg-blue-50/20">
-                    <td class="md:py-5 md:pr-2"><div class="font-black text-blue-600 uppercase text-[10px]">${formatTanggalIndo(d.tgl)}</div><div class="text-[9px] font-bold text-gray-400 italic">${d.jam || '-'}</div></td>
-                    <td class="md:py-5 md:pr-2">${infoNama}<div class="text-[9px] opacity-50 uppercase truncate max-w-[200px] mt-0.5">${d.lokasi || '-'}</div></td>`;
-                if(isAdmin) row += `<td class="hidden md:table-cell md:py-5 text-orange-600 font-black uppercase text-[10px]">${d.rekanan || '-'}</td>`;
-                row += `<td class="hidden md:table-cell md:py-5"><span class="bg-gray-100 dark:bg-gray-700 px-3 py-1 rounded-full text-[8px] font-black uppercase text-gray-600 dark:text-gray-300">${d.kat || '-'}</span></td>`;
-                if(isAdmin) row += `<td class="md:py-5 text-center"><div class="flex gap-3 justify-center">
-                    <button onclick="editData(${d.id})" class="text-blue-600 text-sm">✏️</button>
-                    <button onclick="hapusData(${d.id})" class="text-red-600 text-sm">🗑️</button>
-                </div></td>`;
-                tabel.insertAdjacentHTML('beforeend', row + `</tr>`);
-            });
-            updateStats();
-        }
-
-        async function toggleAdmin() {
-            if(!isAdmin) {
-                if(prompt("Admin Password:") === "123456") {
-                    isAdmin = true;
-                    document.getElementById('mainBody').classList.add('is-admin');
-                    document.getElementById('adminControls').classList.remove('hidden');
-                    document.getElementById('btnLock').innerText = "🔒";
-                    updateBadge(); muatTabel(); aturPilihanPaket();
-                }
-            } else {
-                isAdmin = false;
-                switchTab('agenda');
-                document.getElementById('mainBody').classList.remove('is-admin');
-                document.getElementById('adminControls').classList.add('hidden');
-                document.getElementById('btnLock').innerText = "🔓";
-                updateBadge(); muatTabel(); aturPilihanPaket();
-            }
-        }
-
-        function formatTanggalIndo(tglString) {
-            if(!tglString) return "-";
-            const d = new Date(tglString);
-            return isNaN(d.getTime()) ? tglString : d.toLocaleDateString('id-ID', {day:'2-digit', month:'2-digit', year:'numeric'}).replace(/\//g, '-');
-        }
-
-        function updateBadge() {
-            const b = document.getElementById('badgeMode');
-            b.innerText = isAdmin ? "MODE: ADMIN" : "MODE: " + currentMode;
-            b.className = isAdmin ? "bg-red-500 text-white text-[9px] font-bold px-4 py-1.5 rounded-full uppercase mb-2 inline-block" : "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[9px] font-bold px-4 py-1.5 rounded-full uppercase mb-2 inline-block border border-blue-100 dark:border-blue-800";
-        }
-
-        async function tarikDataCloud(silent = false) {
-            if(!silent) document.getElementById('loadingOverlay').classList.remove('hidden');
-            try {
-                const res = await fetch(URL_SCRIPT + '?t=' + Date.now());
-                const result = await res.json();
-                dataSimpanan = result.filter(d => !d.isPaket);
-                dataPaket = result.filter(d => d.isPaket);
-                muatTabel();
-            } catch (e) { console.error(e); }
-            document.getElementById('loadingOverlay').classList.add('hidden');
-        }
-
-        async function kirimSemuaData() {
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-            try {
-                await fetch(URL_SCRIPT, { method: 'POST', mode: 'no-cors', body: JSON.stringify([...dataSimpanan, ...dataPaket]) });
-            } catch (e) { alert("Gagal Sync!"); }
-            document.getElementById('loadingOverlay').classList.add('hidden');
-        }
-
-        function aturPilihanPaket() {
-            const select = document.getElementById('inputKategori');
-            document.getElementById('fieldRekanan').style.display = isAdmin ? 'block' : 'none';
-            let options = dataPaket.map(p => `<option value="${p.nama}">${p.nama} (Rp ${Number(p.harga).toLocaleString('id-ID')})</option>`).join("");
-            select.innerHTML = options || `<option value="-">Belum ada paket</option>`;
-            
-            if(currentMode === 'Vendor') {
-                document.getElementById('labelNama').innerText = "Nama MUA / Salon";
-                document.getElementById('containerNamaKlien').classList.remove('hidden');
-            } else {
-                document.getElementById('labelNama').innerText = "Nama Calon Pengantin";
-                document.getElementById('containerNamaKlien').classList.add('hidden');
-            }
         }
 
         async function simpanData() {
-            const val = (id) => document.getElementById(id).value;
-            if(!val('inputNama') || !val('inputTanggal')) return alert("Isi Nama & Tanggal!");
-            const obj = {
-                id: document.getElementById('editId').value || Date.now(),
-                tipe: currentMode, nama: val('inputNama'),
-                namaKlien: currentMode === 'Vendor' ? val('inputNamaKlien') : "-",
-                kat: val('inputKategori'), tgl: val('inputTanggal'), jam: val('inputJam'),
-                wa: val('inputKontak'), lokasi: val('inputLokasi'), alamat: val('inputAlamat'),
-                rekanan: val('inputRekanan') || "-"
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            const id = document.getElementById('editId').value || Date.now();
+            const obj = { 
+                id, 
+                tipe: currentMode, 
+                nama: document.getElementById('inputNama').value, 
+                namaKlien: document.getElementById('inputNamaKlien').value || "-", 
+                kat: document.getElementById('inputKategori').value, 
+                tgl: document.getElementById('inputTanggal').value, 
+                jam: document.getElementById('inputJam').value, 
+                wa: document.getElementById('inputKontak').value, 
+                lokasi: document.getElementById('inputLokasi').value, 
+                alamat: document.getElementById('inputAlamat').value, 
+                rekanan: document.getElementById('inputRekanan').value || "BELUM ADA", 
+                harga: document.getElementById('inputHarga').value || 0 
             };
-            const idx = dataSimpanan.findIndex(i => i.id == obj.id);
+            const idx = dataSimpanan.findIndex(i => i.id == id);
             if(idx > -1) dataSimpanan[idx] = obj; else dataSimpanan.push(obj);
-            await kirimSemuaData();
-            cancelEdit(); muatTabel();
+            await fetch(URL_SCRIPT + "?sheet=Agenda", { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataSimpanan) });
+            await tarikDataCloud();
+            bersihkanForm();
+            document.getElementById('loadingOverlay').classList.add('hidden');
         }
 
         function editData(id) {
-            const item = dataSimpanan.find(i => i.id == id);
-            if(!item) return;
-            currentMode = item.tipe || 'Pribadi';
-            aturPilihanPaket();
-            updateBadge();
-            document.getElementById('editId').value = item.id;
-            document.getElementById('inputNama').value = item.nama;
-            document.getElementById('inputTanggal').value = item.tgl;
-            document.getElementById('inputJam').value = item.jam;
-            document.getElementById('inputKontak').value = item.wa;
-            document.getElementById('inputLokasi').value = item.lokasi;
-            document.getElementById('inputAlamat').value = item.alamat;
-            document.getElementById('inputRekanan').value = item.rekanan === "-" ? "" : item.rekanan;
-            if(currentMode === 'Vendor') document.getElementById('inputNamaKlien').value = item.namaKlien;
-            document.getElementById('btnSimpan').innerText = "Update Agenda";
-            document.getElementById('btnCancelEdit').classList.remove('hidden');
-            document.getElementById('formSection').scrollIntoView({behavior: 'smooth'});
+            const d = dataSimpanan.find(i => i.id == id);
+            if(!d) return;
+            setAppMode(d.tipe);
+            document.getElementById('editId').value = d.id;
+            document.getElementById('inputNama').value = d.nama;
+            document.getElementById('inputNamaKlien').value = d.namaKlien;
+            document.getElementById('inputKategori').value = d.kat;
+            document.getElementById('inputTanggal').value = d.tgl;
+            document.getElementById('inputJam').value = d.jam;
+            document.getElementById('inputKontak').value = d.wa;
+            document.getElementById('inputLokasi').value = d.lokasi;
+            document.getElementById('inputAlamat').value = d.alamat;
+            document.getElementById('inputHarga').value = d.harga;
+            document.getElementById('inputRekanan').value = d.rekanan;
+            
+            autoFillHarga(); // Trigger update display harga saat edit
+            document.getElementById('formTitle').innerText = "Update Data";
+            document.getElementById('btnBatal').classList.remove('hidden');
+            document.getElementById('inputNama').focus();
         }
 
-        function cancelEdit() {
+        function bersihkanForm() {
             document.getElementById('editId').value = '';
-            document.getElementById('btnSimpan').innerText = "Simpan Agenda";
-            ['inputNama', 'inputNamaKlien', 'inputTanggal', 'inputJam', 'inputKontak', 'inputLokasi', 'inputAlamat', 'inputRekanan'].forEach(i => document.getElementById(i).value = '');
-            document.getElementById('btnCancelEdit').classList.add('hidden');
+            document.getElementById('formTitle').innerText = "Input Data";
+            document.getElementById('btnBatal').classList.add('hidden');
+            ['inputNama','inputNamaKlien','inputJam','inputKontak','inputLokasi','inputAlamat','inputRekanan','inputHarga'].forEach(i => document.getElementById(i).value = '');
+            document.getElementById('textHargaDisplay').innerText = "Rp 0";
         }
 
         async function hapusData(id) {
-            if(confirm("Hapus agenda?")) {
-                dataSimpanan = dataSimpanan.filter(i => i.id != id);
-                await kirimSemuaData();
-                muatTabel();
+            if(!confirm("Hapus data ini?")) return;
+            dataSimpanan = dataSimpanan.filter(i => i.id != id);
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            await fetch(URL_SCRIPT + "?sheet=Agenda", { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataSimpanan) });
+            await tarikDataCloud();
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        function toggleAdmin() {
+            if(isAdmin) {
+                isAdmin = false;
+                document.getElementById('mainBody').classList.remove('is-admin');
+                document.getElementById('mainContent').classList.add('hidden');
+                document.getElementById('mainContent').classList.remove('opacity-100');
+                document.getElementById('selectionScreen').style.display = 'flex';
+                document.getElementById('tab-paket').classList.add('hidden');
+                return;
+            }
+            if(prompt("Admin Password:") === "123456") {
+                isAdmin = true;
+                document.getElementById('mainBody').classList.add('is-admin');
+                document.getElementById('tab-paket').classList.remove('hidden');
+                updateBadge(); muatTabel(dataSimpanan); updateHighlights();
             }
         }
 
-        function eksporExcel() {
-            const ws = XLSX.utils.json_to_sheet(dataSimpanan), wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Database");
-            XLSX.writeFile(wb, "Data_Nadzar.xlsx");
+        function renderTabelPaket() {
+            const container = document.getElementById('isiTabelPaket');
+            container.innerHTML = dataPaket.map(p => `
+                <tr class="border-b dark:border-gray-700"><td class="py-4 px-4 font-bold">${p.namaPaket}</td><td class="text-right px-4">Rp ${parseInt(p.hargaPaket || 0).toLocaleString()}</td>
+                <td class="text-center px-4"><button onclick="editPaket(${p.id})" class="text-blue-500">✏️</button> <button onclick="hapusPaket(${p.id})" class="text-red-500 ml-2">🗑️</button></td></tr>`).join('');
         }
+
+        function formatTanggalIndo(t) {
+            const d = new Date(t);
+            return isNaN(d.getTime()) ? t : d.toLocaleDateString('id-ID', {day:'2-digit', month:'short', year:'numeric'});
+        }
+
+        function updateBadge() { document.getElementById('badgeMode').innerText = isAdmin ? "MODE: ADMIN (" + currentMode + ")" : "MODE: " + currentMode; }
+
+        function aturPilihanPaket() {
+            const s = document.getElementById('inputKategori');
+            s.innerHTML = dataPaket.length ? dataPaket.map(p => `<option value="${p.namaPaket}">${p.namaPaket}</option>`).join('') : '<option value="Wedding">Wedding</option>';
+            autoFillHarga();
+        }
+
+        function autoFillHarga() {
+            const p = dataPaket.find(x => x.namaPaket === document.getElementById('inputKategori').value);
+            if(p) {
+                const hargaFormatted = parseInt(p.hargaPaket || 0).toLocaleString();
+                // Update input hidden harga (untuk simpan ke DB)
+                document.getElementById('inputHarga').value = p.hargaPaket;
+                // Update tampilan teks untuk user biasa
+                document.getElementById('textHargaDisplay').innerText = "Rp " + hargaFormatted;
+            }
+        }
+
+        function switchTab(t) {
+            document.getElementById('section-agenda').classList.toggle('hidden', t !== 'agenda');
+            document.getElementById('section-paket').classList.toggle('hidden', t !== 'paket');
+            document.getElementById('tab-agenda').className = t === 'agenda' ? 'border-b-2 border-blue-600 pb-2 text-[10px] font-black uppercase tracking-widest' : 'pb-2 text-[10px] font-black uppercase tracking-widest opacity-40';
+            document.getElementById('tab-paket').className = t === 'paket' ? 'border-b-2 border-blue-600 pb-2 text-[10px] font-black uppercase tracking-widest' : 'pb-2 text-[10px] font-black uppercase tracking-widest opacity-40';
+        }
+
+        document.getElementById('themeToggle').onclick = () => document.documentElement.classList.toggle('dark');
     </script>
 </body>
 </html>
