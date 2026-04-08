@@ -3,184 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Veridical.co - Management System v4.5.6</title>
+    <title>Nadzar Photowork - Cloud v4.5.6</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { 
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: { 50: '#f0f7ff', 100: '#e0effe', 200: '#bae0fd', 300: '#7cc8fc', 400: '#36acf9', 500: '#0c91eb', 600: '#0071c5', 700: '#015da3', 800: '#064f86', 900: '#0b426f' }
-                    },
-                    borderRadius: { '4xl': '2rem' }
-                }
-            }
-        }
-    </script>
+    <script>tailwind.config = { darkMode: 'class' }</script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        :root { font-family: 'Plus Jakarta Sans', sans-serif; }
-        
-        body { @apply bg-[#F9FAFB] text-slate-900 transition-colors duration-300; }
-        .dark body { @apply bg-[#0b1120] text-slate-100; }
-
-        .admin-only { display: none !important; }
-        .is-admin .admin-only { display: block !important; }
-        .is-admin .admin-flex { display: flex !important; }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { @apply bg-transparent; }
-        ::-webkit-scrollbar-thumb { @apply bg-slate-200 dark:bg-slate-800 rounded-full; }
-
-        .glass-card { @apply bg-white dark:bg-[#151c2c] border border-slate-100 dark:border-slate-800 shadow-sm rounded-[2rem] transition-all duration-300; }
-        
-        .form-input-veridical { 
-            @apply w-full px-5 py-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 rounded-2xl font-semibold text-slate-900 dark:text-white outline-none transition-all duration-300 focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500;
-        }
-
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; transition: all 0.3s; }
+        .admin-only { display: none; }
+        .is-admin .admin-only { display: block; }
+        .loader-ring { border: 3px solid rgba(37, 99, 235, 0.1); border-top: 3px solid #2563EB; border-radius: 50%; width: 40px; height: 40px; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .loader-ring { border: 3px solid rgba(12, 145, 235, 0.1); border-top: 3px solid #0c91eb; border-radius: 50%; width: 44px; height: 44px; animation: spin 0.8s linear infinite; }
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
+        .glass-box { background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .today-highlight { border: 2px solid #2563EB !important; box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.2); position: relative; background: rgba(37, 99, 235, 0.03) !important; }
+        .dark .today-highlight { background: rgba(37, 99, 235, 0.1) !important; }
     </style>
 </head>
-<body id="mainBody">
+<body id="mainBody" class="bg-[#F8FAFC] dark:bg-gray-900 text-gray-800 dark:text-gray-100 text-sm">
 
-    <div id="loadingOverlay" class="fixed inset-0 z-[100] bg-white/90 dark:bg-slate-950/90 flex flex-col items-center justify-center hidden backdrop-blur-sm">
-        <div class="loader-ring mb-4"></div>
-        <p class="text-[10px] font-black text-brand-600 uppercase tracking-widest animate-pulse">Syncing System v4.5.6...</p>
+    <div id="loadingOverlay" class="fixed inset-0 z-[100] bg-white/95 dark:bg-gray-900/95 flex items-center justify-center hidden backdrop-blur-sm">
+        <div class="loader-ring"></div>
     </div>
 
-    <div id="selectionScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900 text-center px-6">
-        <div class="max-w-sm w-full">
-            <h1 class="text-4xl font-extrabold italic uppercase tracking-tighter text-white mb-16">Veridical<span class="text-brand-500">.co</span></h1>
+    <div id="selectionScreen" class="fixed inset-0 z-50 flex items-center justify-center bg-blue-600 text-center px-6 text-white">
+        <div class="max-w-md w-full">
+            <h1 class="text-5xl font-extrabold mb-2 italic uppercase tracking-tighter">Nadzar</h1>
+            <p class="mb-10 opacity-70 tracking-[0.3em] uppercase text-[10px] font-bold">Automated Cloud System</p>
             <div class="flex flex-col gap-4">
-                <button onclick="openApp('Pribadi')" class="bg-white text-slate-900 p-6 rounded-3xl font-extrabold uppercase hover:scale-105 transition-all">👤 Personal Access</button>
-                <button onclick="openApp('Vendor')" class="bg-slate-800 text-white p-6 rounded-3xl border border-slate-700 font-extrabold uppercase hover:scale-105 transition-all">💄 Vendor Access</button>
+                <button onclick="openApp('Pribadi')" class="bg-white text-blue-600 p-6 rounded-[2rem] font-black uppercase tracking-widest hover:scale-105 transition shadow-2xl">👤 Input Klien</button>
+                <button onclick="openApp('Vendor')" class="bg-blue-500 text-white p-6 rounded-[2rem] border-2 border-blue-400 font-black uppercase tracking-widest hover:scale-105 transition shadow-2xl">💄 Input MUA</button>
             </div>
+            <p class="mt-8 text-[9px] opacity-50 font-bold uppercase tracking-widest">NADZAR PHOTOWORK © 2026</p>
         </div>
     </div>
 
-    <div id="mainContent" class="hidden opacity-0 transition-all duration-700 container mx-auto p-4 md:p-8 max-w-7xl pb-20">
-        
-        <header class="flex justify-between items-center mb-10 pb-6 border-b dark:border-slate-800">
+    <div id="mainContent" class="hidden opacity-0 transition-all duration-700 container mx-auto p-4 md:p-10 max-w-7xl">
+        <div class="flex justify-between items-start mb-8">
             <div>
-                <div id="badgeMode" class="bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[9px] font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block tracking-widest italic italic">MODE: LOADING</div>
-                <h1 class="text-3xl font-black text-slate-950 dark:text-white tracking-tighter uppercase italic">Veridical<span class="text-brand-600">.co</span></h1>
+                <div id="badgeMode" class="bg-blue-100 text-blue-600 text-[9px] font-bold px-3 py-1 rounded-full uppercase mb-2 inline-block tracking-widest">LOADING...</div>
+                <h1 class="text-3xl font-extrabold text-[#2563EB] tracking-tighter">Nadzar Photowork</h1>
             </div>
             <div class="flex gap-2">
-                <button onclick="toggleAdmin()" class="w-10 h-10 flex items-center justify-center glass-card hover:bg-slate-50 dark:hover:bg-slate-800 transition">🔓</button>
-                <button onclick="document.documentElement.classList.toggle('dark')" class="w-10 h-10 flex items-center justify-center glass-card hover:bg-slate-50 dark:hover:bg-slate-800 transition">🌙</button>
+                <button onclick="toggleAdmin()" class="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-md text-lg hover:scale-110 transition">🔓</button>
+                <button id="themeToggle" class="w-10 h-10 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full shadow-md hover:scale-110 transition">🌙</button>
             </div>
-        </header>
+        </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-10">
-            <div class="lg:col-span-8 bg-slate-900 text-white p-8 rounded-4xl relative overflow-hidden">
-                <div class="relative z-10">
-                    <h3 class="text-[10px] font-bold uppercase tracking-[0.3em] text-brand-400 mb-6 flex items-center gap-2 italic">● Agenda Hari Ini</h3>
-                    <div id="agendaHariIniList" class="space-y-4"></div>
+        <div class="admin-only mb-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div class="lg:col-span-8 bg-gradient-to-br from-blue-700 to-indigo-900 text-white p-8 rounded-[2.5rem] shadow-xl relative overflow-hidden flex flex-col md:flex-row gap-6 min-h-[340px]">
+                    <div class="flex-1 z-10">
+                        <h3 class="text-[9px] font-black uppercase tracking-[0.3em] text-blue-200 mb-6 flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-yellow-400 animate-ping"></span> AGENDA HARI INI
+                        </h3>
+                        <div id="agendaHariIniList" class="space-y-4 overflow-y-auto max-h-[220px] custom-scroll pr-4"></div>
+                    </div>
+                    <div class="w-full md:w-72 glass-box rounded-[1.5rem] p-6 z-10">
+                        <h3 class="text-[8px] font-black uppercase tracking-widest text-blue-300 mb-4">JADWAL SELANJUTNYA</h3>
+                        <div id="nextList" class="space-y-4 overflow-y-auto max-h-[200px] custom-scroll pr-2"></div>
+                    </div>
                 </div>
-                <div class="absolute -right-10 -bottom-10 text-[12rem] font-black italic text-white/[0.03] pointer-events-none uppercase">Today</div>
-            </div>
-            
-            <div class="lg:col-span-4 flex flex-col gap-6">
-                <div class="glass-card p-8 flex-1">
-                    <h3 class="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-6 italic">Next Schedule</h3>
-                    <div id="nextList" class="space-y-4"></div>
-                </div>
-                <div class="glass-card p-8 bg-brand-600 border-none text-white">
-                    <div class="flex justify-between items-end">
-                        <div>
-                            <p class="text-[10px] font-bold uppercase opacity-60">Total Agenda</p>
-                            <h2 id="statTotal" class="text-5xl font-black italic">0</h2>
+                <div class="lg:col-span-4 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border dark:border-gray-700 flex flex-col justify-center text-center">
+                    <h3 class="text-[10px] font-extrabold uppercase tracking-[0.2em] text-gray-400 mb-6">SUMMARY JOB BULAN INI</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="border-r dark:border-gray-700">
+                            <div id="statTotal" class="text-5xl font-black text-blue-600">0</div>
+                            <div class="text-[9px] font-bold text-blue-400 uppercase mt-2 tracking-widest">TOTAL</div>
                         </div>
-                        <div class="text-right">
-                            <p class="text-[10px] font-bold uppercase opacity-60">Vendor</p>
-                            <h2 id="statVendor" class="text-2xl font-black italic">0</h2>
+                        <div>
+                            <div id="statVendor" class="text-5xl font-black text-purple-600">0</div>
+                            <div class="text-[9px] font-bold text-purple-400 uppercase mt-2 tracking-widest">VENDOR</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <nav id="navAdmin" class="admin-flex hidden mb-8 gap-2 bg-slate-100 dark:bg-slate-900 p-1.5 rounded-2xl w-fit">
-            <button onclick="switchTab('agenda')" id="tab-agenda" class="px-6 py-3 rounded-xl text-[10px] font-black uppercase bg-white dark:bg-slate-800 shadow-sm">📅 Database</button>
-            <button onclick="switchTab('paket')" id="tab-paket" class="px-6 py-3 rounded-xl text-[10px] font-black uppercase text-slate-400">🏷️ Paket</button>
-        </nav>
+        <div class="mb-6 border-b border-gray-200 dark:border-gray-700 flex gap-6">
+            <button onclick="switchTab('agenda')" id="tab-agenda" class="border-b-2 border-blue-600 pb-2 text-[10px] font-black uppercase tracking-widest">📅 Agenda</button>
+            <button onclick="switchTab('paket')" id="tab-paket" class="hidden pb-2 text-[10px] font-black uppercase tracking-widest opacity-40">🏷️ Paket</button>
+        </div>
 
-        <div id="section-agenda" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div id="formContainer" class="lg:col-span-4 glass-card p-8 h-fit sticky top-6">
-                <h2 class="text-lg font-black mb-10 text-slate-900 dark:text-white uppercase italic tracking-widest border-b dark:border-slate-800 pb-4">Input Data</h2>
-                <div class="space-y-6">
-                    <input type="hidden" id="editId">
-                    <div>
-                        <label class="text-[9px] font-bold text-slate-400 uppercase ml-2 mb-1 block" id="labelVendor">Nama</label>
-                        <input type="text" id="inputNama" class="form-input-veridical">
-                    </div>
-                    <div id="containerNamaKlien" class="hidden">
-                        <label class="text-[9px] font-bold text-purple-500 uppercase ml-2 mb-1 block">Nama Klien (Pengantin)</label>
-                        <input type="text" id="inputNamaKlien" class="form-input-veridical !border-purple-200 dark:!border-purple-900/50">
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
+        <div id="section-agenda">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div id="formContainer" class="lg:col-span-4 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border dark:border-gray-700 h-fit">
+                    <h2 id="formTitle" class="text-xl font-black mb-6 text-blue-600 uppercase italic">Input Data</h2>
+                    <div class="space-y-4">
+                        <input type="hidden" id="editId">
                         <div>
-                            <label class="text-[9px] font-bold text-slate-400 uppercase ml-2 mb-1 block">Paket</label>
-                            <select id="inputKategori" onchange="autoFillHarga()" class="form-input-veridical text-xs"></select>
+                            <label id="labelVendor" class="hidden text-[10px] font-bold text-purple-600 uppercase ml-2 mb-1 tracking-widest">Nama Vendor</label>
+                            <input type="text" id="inputNama" placeholder="Nama" class="w-full p-4 rounded-2xl border dark:bg-gray-700 font-bold outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
-                        <div>
-                            <label class="text-[9px] font-bold text-slate-400 uppercase ml-2 mb-1 block">Tanggal</label>
-                            <input type="date" id="inputTanggal" class="form-input-veridical text-xs">
+                        <div id="containerNamaKlien" class="hidden">
+                            <input type="text" id="inputNamaKlien" placeholder="Nama Klien" class="w-full p-4 rounded-2xl border border-purple-100 dark:bg-gray-700 font-bold italic outline-none focus:ring-2 focus:ring-purple-400">
+                        </div>
+                        <div class="space-y-2">
+                            <div class="grid grid-cols-2 gap-2">
+                                <select id="inputKategori" onchange="autoFillHarga()" class="p-4 rounded-2xl border dark:bg-gray-700 font-bold outline-none"></select>
+                                <input type="date" id="inputTanggal" class="p-4 rounded-2xl border dark:bg-gray-700 outline-none font-bold">
+                            </div>
+                            <div class="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-xl border border-blue-100 dark:border-blue-800 flex justify-between items-center px-4">
+                                <span class="text-[9px] font-bold opacity-50 uppercase">Estimasi Harga:</span>
+                                <span id="textHargaDisplay" class="text-xs font-black text-blue-600 dark:text-blue-400 italic">Rp 0</span>
+                            </div>
+                        </div>
+                        <div class="admin-only"><input type="number" id="inputHarga" placeholder="Harga IDR" class="w-full p-4 rounded-2xl border border-green-100 dark:bg-gray-700 font-bold"></div>
+                        <input type="text" id="inputJam" placeholder="Jam (Contoh: 08.00 - Selesai)" class="w-full p-4 rounded-2xl border dark:bg-gray-700">
+                        <input type="text" id="inputKontak" placeholder="WhatsApp (08xx)" class="w-full p-4 rounded-2xl border dark:bg-gray-700">
+                        <input type="text" id="inputLokasi" placeholder="Lokasi Acara" class="w-full p-4 rounded-2xl border dark:bg-gray-700">
+                        <textarea id="inputAlamat" placeholder="Alamat Lengkap" class="w-full p-4 rounded-2xl border dark:bg-gray-700 h-20"></textarea>
+                        <div id="fieldRekanan" class="admin-only"><input type="text" id="inputRekanan" placeholder="Handler Fotografer" class="w-full p-4 rounded-2xl border border-orange-100 dark:bg-gray-700 font-bold uppercase text-xs"></div>
+                        <div class="pt-2 flex flex-col gap-2">
+                            <button onclick="simpanData()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl uppercase text-[10px] tracking-widest shadow-lg transition active:scale-95">Simpan Agenda</button>
+                            <button id="btnBatal" onclick="bersihkanForm()" class="hidden w-full bg-red-50 text-red-600 font-bold py-3 rounded-2xl uppercase text-[9px]">Batal</button>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <input type="text" id="inputJam" placeholder="Jam Acara" class="form-input-veridical">
-                        <input type="text" id="inputKontak" placeholder="WhatsApp" class="form-input-veridical">
-                    </div>
-                    <input type="text" id="inputLokasi" placeholder="Lokasi (Gedung/Rumah)" class="form-input-veridical">
-                    <textarea id="inputAlamat" placeholder="Alamat Lengkap..." class="form-input-veridical h-24 resize-none"></textarea>
-                    
-                    <div class="admin-only border-t dark:border-slate-800 pt-6 space-y-4">
-                        <input type="number" id="inputHarga" placeholder="Harga Deal" class="form-input-veridical !text-green-600 font-bold">
-                        <input type="text" id="inputRekanan" placeholder="Handler Photographer" class="form-input-veridical !text-orange-500 uppercase italic">
-                    </div>
-
-                    <button onclick="simpanData()" class="w-full bg-brand-600 text-white font-black py-5 rounded-2xl uppercase text-[11px] tracking-widest shadow-xl shadow-brand-500/20 active:scale-95 transition-all">Simpan Agenda</button>
-                    <button id="btnBatal" onclick="bersihkanForm()" class="hidden w-full bg-slate-100 dark:bg-slate-800 text-slate-500 font-bold py-3 rounded-2xl uppercase text-[9px]">Batal Edit</button>
                 </div>
-            </div>
 
-            <div class="lg:col-span-8">
-                <div class="glass-card p-8">
-                    <div class="flex flex-wrap justify-between items-center mb-8 pb-4 border-b dark:border-slate-800">
-                        <h2 class="text-lg font-black uppercase italic tracking-wider">Live Database</h2>
-                        <div class="flex gap-2">
-                            <select id="filterLimit" onchange="cariAgenda()" class="bg-slate-50 dark:bg-slate-900 px-3 py-2 rounded-xl text-[10px] font-bold outline-none border border-slate-100 dark:border-slate-800">
-                                <option value="5">5 Baris</option><option value="10" selected>10 Baris</option><option value="25">25 Baris</option><option value="all">Semua</option>
+                <div class="lg:col-span-8 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border dark:border-gray-700 min-h-[500px] flex flex-col">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+                        <h2 class="text-xl font-black text-blue-600 uppercase italic tracking-tighter">Daftar Agenda</h2>
+                        
+                        <div class="flex flex-wrap items-center gap-2 admin-only">
+                            <select id="showEntries" onchange="resetHalamanDanCari()" class="bg-blue-50 dark:bg-blue-900/30 px-3 py-2.5 rounded-xl text-[10px] font-black uppercase text-blue-600 outline-none border-none">
+                                <option value="5">Tampil 5</option>
+                                <option value="10">Tampil 10</option>
+                                <option value="25">Tampil 25</option>
+                                <option value="50">Tampil 50</option>
+                                <option value="all">Semua</option>
                             </select>
-                            <input type="text" id="searchInput" onkeyup="cariAgenda()" placeholder="Cari..." class="bg-slate-50 dark:bg-slate-900 px-4 py-2 rounded-xl text-xs font-bold outline-none border border-slate-100 dark:border-slate-800 w-32 md:w-48">
+
+                            <select id="filterTahun" onchange="resetHalamanDanCari()" class="bg-gray-50 dark:bg-gray-700 px-3 py-2.5 rounded-xl text-[10px] font-black uppercase outline-none border-none">
+                                <option value="all">Tahun</option>
+                                <option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option>
+                                <option value="2028">2028</option><option value="2029">2029</option><option value="2030">2030</option>
+                            </select>
+                            
+                            <select id="filterBulan" onchange="resetHalamanDanCari()" class="bg-gray-50 dark:bg-gray-700 px-3 py-2.5 rounded-xl text-[10px] font-black uppercase outline-none border-none">
+                                <option value="all">Bulan</option>
+                                <option value="01">Jan</option><option value="02">Feb</option><option value="03">Mar</option>
+                                <option value="04">Apr</option><option value="05">Mei</option><option value="06">Jun</option>
+                                <option value="07">Jul</option><option value="08">Agt</option><option value="09">Sep</option>
+                                <option value="10">Okt</option><option value="11">Nov</option><option value="12">Des</option>
+                            </select>
+                            
+                            <div class="relative w-full md:w-32">
+                                <input type="text" id="searchInput" onkeyup="resetHalamanDanCari()" placeholder="Cari..." class="w-full pl-8 pr-4 py-2.5 rounded-xl bg-gray-50 dark:bg-gray-700 border-none text-[11px] font-bold outline-none">
+                                <span class="absolute left-3 top-2.5 opacity-30 text-xs">🔍</span>
+                            </div>
                         </div>
                     </div>
-                    <div id="isiTabel" class="space-y-4"></div>
+
+                    <div id="isiTabel" class="space-y-3 flex-1"></div>
+
+                    <div id="paginationContainer" class="mt-8 flex items-center justify-between pt-6 border-t dark:border-gray-700">
+                        <div class="text-[10px] font-bold opacity-40 uppercase tracking-widest" id="pageInfo">Halaman 1 dari 1</div>
+                        <div class="flex gap-2">
+                            <button id="btnPrev" onclick="ubahHalaman(-1)" class="px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-xl text-[10px] font-black uppercase disabled:opacity-30">Prev</button>
+                            <button id="btnNext" onclick="ubahHalaman(1)" class="px-4 py-2 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase disabled:opacity-30">Next</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div id="section-paket" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div class="lg:col-span-4 glass-card p-8 h-fit">
-                <h2 class="text-lg font-black mb-8 uppercase italic">Master Paket</h2>
-                <div class="space-y-4">
-                    <input type="hidden" id="editIdPaket">
-                    <input type="text" id="p_nama" placeholder="Nama Paket" class="form-input-veridical">
-                    <input type="number" id="p_harga" placeholder="Harga Default" class="form-input-veridical">
-                    <button onclick="simpanPaket()" class="w-full bg-brand-600 text-white font-black py-4 rounded-2xl uppercase text-[10px]">Update Paket</button>
+        <div id="section-paket" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <div class="lg:col-span-4 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] border border-blue-100 h-fit">
+                    <h2 class="text-xl font-black text-blue-600 uppercase italic">Master Paket</h2>
+                    <div class="space-y-4 mt-6">
+                        <input type="hidden" id="editIdPaket">
+                        <input type="text" id="p_nama" placeholder="Nama Paket" class="w-full p-4 rounded-2xl border dark:bg-gray-700 font-bold">
+                        <input type="number" id="p_harga" placeholder="Harga IDR" class="w-full p-4 rounded-2xl border dark:bg-gray-700 font-bold">
+                        <textarea id="p_desc" placeholder="Keterangan..." class="w-full p-4 rounded-2xl border dark:bg-gray-700"></textarea>
+                        <button onclick="simpanPaket()" class="w-full bg-blue-600 text-white font-black py-4 rounded-2xl uppercase text-[10px] tracking-widest shadow-lg">Simpan Paket</button>
+                    </div>
                 </div>
-            </div>
-            <div class="lg:col-span-8 glass-card p-8 overflow-x-auto">
-                <table class="w-full text-[10px] font-bold uppercase">
-                    <thead class="text-slate-400 border-b dark:border-slate-800">
-                        <tr><th class="pb-4 text-left px-4">Nama Paket</th><th class="pb-4 text-right px-4">Harga Default</th><th class="pb-4 text-center px-4">Aksi</th></tr>
-                    </thead>
-                    <tbody id="isiTabelPaket" class="dark:text-white"></tbody>
-                </table>
+                <div class="lg:col-span-8 bg-white dark:bg-gray-800 p-8 rounded-[2.5rem] shadow-xl border dark:border-gray-700">
+                    <table class="w-full text-[10px] font-bold uppercase">
+                        <thead><tr class="opacity-30 border-b dark:border-gray-700"><th class="pb-4 text-left px-4">Paket</th><th class="pb-4 text-right px-4">Harga</th><th class="pb-4 text-center px-4">Aksi</th></tr></thead>
+                        <tbody id="isiTabelPaket"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -188,122 +193,226 @@
     <script>
         const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbyUQB4oF5LRpn2iC3kvCZlZk4yy0u5LjbyRBGmy5ldt4wRI1n87zybB3ut_LlEEGhJKXA/exec";
         let currentMode = "", isAdmin = false, dataSimpanan = [], dataPaket = [];
+        let currentPage = 1, filteredData = [];
+
+        // Auto filter bulan & tahun sekarang
+        function autoSetFilter() {
+            const now = new Date();
+            document.getElementById('filterTahun').value = now.getFullYear();
+            document.getElementById('filterBulan').value = ("0" + (now.getMonth() + 1)).slice(-2);
+        }
 
         async function openApp(mode) {
             document.getElementById('loadingOverlay').classList.remove('hidden');
-            currentMode = mode;
-            document.getElementById('containerNamaKlien').classList.toggle('hidden', mode !== 'Vendor');
-            document.getElementById('labelVendor').innerText = (mode === 'Vendor') ? "Nama Vendor MUA" : "Nama Lengkap";
-            try { await Promise.all([tarikDataCloud(), tarikPaketCloud()]); } catch (e) {}
-            document.getElementById('selectionScreen').classList.add('hidden');
+            autoSetFilter();
+            setAppMode(mode);
+            try { await Promise.all([tarikDataCloud(), tarikPaketCloud()]); } catch (e) { }
+            document.getElementById('selectionScreen').style.display = 'none';
             document.getElementById('mainContent').classList.remove('hidden');
-            setTimeout(() => { document.getElementById('mainContent').classList.add('opacity-100'); }, 50);
+            setTimeout(() => document.getElementById('mainContent').classList.add('opacity-100'), 50);
+            updateBadge();
             document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        function setAppMode(mode) {
+            currentMode = mode;
+            const isVendor = (mode === 'Vendor');
+            document.getElementById('containerNamaKlien').classList.toggle('hidden', !isVendor);
+            document.getElementById('labelVendor').classList.toggle('hidden', !isVendor);
             updateBadge();
         }
 
         async function tarikDataCloud() {
-            const res = await fetch(`${URL_SCRIPT}?sheet=Agenda&t=${Date.now()}`);
-            dataSimpanan = await res.json();
-            cariAgenda();
-            updateHighlights();
+            try {
+                const res = await fetch(URL_SCRIPT + "?sheet=Agenda&t=" + Date.now());
+                dataSimpanan = await res.json();
+                cariAgenda();
+                updateHighlights();
+            } catch (e) { }
         }
 
         async function tarikPaketCloud() {
-            const res = await fetch(`${URL_SCRIPT}?sheet=Paket&t=${Date.now()}`);
-            dataPaket = await res.json();
-            document.getElementById('inputKategori').innerHTML = dataPaket.map(p => `<option value="${p.namaPaket}">${p.namaPaket}</option>`).join('');
-            renderTabelPaket();
+            try {
+                const res = await fetch(URL_SCRIPT + "?sheet=Paket&t=" + Date.now());
+                dataPaket = await res.json();
+                aturPilihanPaket();
+                renderTabelPaket();
+            } catch (e) { }
         }
 
-        function cariAgenda() {
-            const s = document.getElementById('searchInput').value.toLowerCase();
-            const limit = document.getElementById('filterLimit').value;
-            let filtered = dataSimpanan.filter(d => (d.nama||"").toLowerCase().includes(s) || (d.namaKlien||"").toLowerCase().includes(s) || (d.tgl||"").includes(s)).sort((a,b) => new Date(a.tgl) - new Date(b.tgl));
+        function resetHalamanDanCari() {
+            currentPage = 1;
+            cariAgenda();
+        }
+
+        function cariAgenda() { 
+            const searchVal = document.getElementById('searchInput').value.toLowerCase();
+            const bulanVal = document.getElementById('filterBulan').value;
+            const tahunVal = document.getElementById('filterTahun').value;
+            let data = dataSimpanan;
+
+            if(isAdmin) {
+                data = data.filter(d => 
+                    (d.nama||"").toLowerCase().includes(searchVal) || 
+                    (d.namaKlien||"").toLowerCase().includes(searchVal) || 
+                    (d.lokasi||"").toLowerCase().includes(searchVal)
+                );
+                if(bulanVal !== "all") data = data.filter(d => d.tgl && d.tgl.split('-')[1] === bulanVal);
+                if(tahunVal !== "all") data = data.filter(d => d.tgl && d.tgl.split('-')[0] === tahunVal);
+            }
             
-            const displayData = limit === 'all' ? filtered : filtered.slice(0, parseInt(limit));
+            // SMART SORT UNTUK TAMPILAN
+            filteredData = data.sort((a,b) => new Date(a.tgl || 0) - new Date(b.tgl || 0));
+            muatTabelHalaman(); 
+        }
+
+        function muatTabelHalaman() {
+            const limitVal = document.getElementById('showEntries').value;
+            const limit = limitVal === 'all' ? filteredData.length : parseInt(limitVal);
+            const totalPage = Math.ceil(filteredData.length / limit) || 1;
+            const todayStr = new Date().toISOString().split('T')[0];
+            
+            if(currentPage > totalPage) currentPage = totalPage;
+            const start = (currentPage - 1) * limit;
+            const pagedData = filteredData.slice(start, start + limit);
+
             const container = document.getElementById('isiTabel');
+            container.innerHTML = '';
             
-            container.innerHTML = displayData.map(d => `
-                <div class="glass-card p-6 border-l-4 ${d.tgl === new Date().toISOString().split('T')[0] ? 'border-brand-500' : 'border-transparent'}">
-                    <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                        <div class="flex-1">
-                            <div class="text-[10px] text-brand-600 font-extrabold uppercase italic mb-1">${d.tgl} — ${d.jam}</div>
-                            <div class="text-base font-black uppercase text-slate-950 dark:text-white">${d.tipe === 'Vendor' ? d.namaKlien : d.nama}</div>
-                            <div class="flex flex-wrap gap-x-4 gap-y-1 mt-2">
-                                <span class="text-[9px] text-slate-400 font-bold uppercase italic tracking-widest">📍 ${d.lokasi}</span>
-                                <span class="text-[9px] text-slate-400 font-bold uppercase tracking-widest">🏷️ ${d.kat}</span>
-                                ${isAdmin ? `<span class="text-[9px] text-orange-500 font-bold uppercase">📸 Handler: ${d.rekanan || '-'}</span>` : ''}
+            if(pagedData.length === 0) {
+                container.innerHTML = '<div class="text-center py-10 opacity-30 font-bold uppercase text-[10px] tracking-widest italic">Tidak ada agenda ditemukan</div>';
+            } else {
+                pagedData.forEach(d => {
+                    const isToday = d.tgl === todayStr;
+                    const waLink = d.wa ? `https://wa.me/${d.wa.replace(/^0/, '62')}` : '#';
+                    const cardClass = isToday ? 'today-highlight' : '';
+                    const todayBadge = isToday ? `<div class="absolute -top-3 -right-2 bg-blue-600 text-white text-[7px] font-black px-2 py-1 rounded-lg animate-bounce shadow-lg uppercase tracking-tighter z-10">Hari Ini 🔥</div>` : '';
+
+                    const content = isAdmin ? `
+                        <div class="md:col-span-5 relative">
+                            ${todayBadge}
+                            <div class="text-[9px] font-black ${isToday ? 'text-blue-600' : 'text-gray-400'} mb-1 uppercase tracking-tighter">${formatTanggalIndo(d.tgl)} | ${d.jam || '-'}</div>
+                            <div class="text-base font-black uppercase text-gray-800 dark:text-white leading-tight">${d.tipe === 'Vendor' ? d.namaKlien : d.nama}</div>
+                            <div class="text-[10px] font-bold text-purple-600 dark:text-purple-400 uppercase mt-1 italic">${d.tipe === 'Vendor' ? '💄 ' + d.nama : '👤 Personal'}</div>
+                        </div>
+                        <div class="md:col-span-4 border-l border-gray-200 dark:border-gray-700 pl-4 md:block hidden">
+                            <span class="text-[10px] bg-green-500/10 text-green-600 px-2.5 py-1 rounded-lg font-black italic block w-fit mb-1">💰 Rp ${parseInt(d.harga || 0).toLocaleString()}</span>
+                            <span class="text-[10px] bg-orange-500/10 text-orange-600 px-2.5 py-1 rounded-lg font-black italic uppercase w-fit">📸 ${d.rekanan || '-'}</span>
+                        </div>
+                        <div class="md:col-span-3 flex justify-end gap-2">
+                            <a href="${waLink}" target="_blank" class="w-9 h-9 flex items-center justify-center bg-green-100 text-green-600 rounded-full hover:scale-110 shadow-sm transition">📞</a>
+                            <button onclick="editData(${d.id})" class="w-9 h-9 flex items-center justify-center bg-blue-50 text-blue-600 rounded-full hover:scale-110 shadow-sm transition">✏️</button>
+                            <button onclick="hapusData(${d.id})" class="w-9 h-9 flex items-center justify-center bg-red-50 text-red-600 rounded-full hover:scale-110 shadow-sm transition">🗑️</button>
+                        </div>` : `
+                        <div class="md:col-span-12 flex justify-between items-center relative">
+                            ${todayBadge}
+                            <div>
+                                <div class="text-[10px] font-black text-blue-600 uppercase tracking-widest">${formatTanggalIndo(d.tgl)}</div>
+                                <div class="text-xs bg-white dark:bg-gray-700 px-3 py-1.5 rounded-lg font-black text-blue-600 shadow-sm mt-1 italic inline-block">${d.jam || '-'}</div>
                             </div>
-                        </div>
-                        <div class="flex gap-2 items-center">
-                            ${isAdmin ? `
-                                <button onclick="editData(${d.id})" class="w-10 h-10 flex items-center justify-center bg-slate-100 dark:bg-slate-800 rounded-xl hover:bg-brand-600 hover:text-white transition">✏️</button>
-                                <a href="https://wa.me/${d.wa}" target="_blank" class="w-10 h-10 flex items-center justify-center bg-green-50 dark:bg-green-900/20 text-green-600 rounded-xl hover:bg-green-600 hover:text-white transition">📞</a>
-                                <button onclick="hapusData(${d.id})" class="w-10 h-10 flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition">🗑️</button>
-                            ` : `<div class="text-[8px] font-black text-slate-300 dark:text-slate-700 tracking-tighter uppercase rotate-90">VERIDICAL</div>`}
-                        </div>
-                    </div>
-                </div>
-            `).join('') || '<div class="text-center py-10 opacity-30 italic text-xs uppercase tracking-widest">No Data Found</div>';
+                            <div class="text-right flex-1 ml-4">
+                                <div class="text-[9px] font-bold opacity-40 uppercase tracking-widest mb-0.5">Lokasi</div>
+                                <div class="text-[11px] font-black uppercase text-gray-700 dark:text-gray-300 italic truncate block">📍 ${d.lokasi || '-'}</div>
+                            </div>
+                        </div>`;
+
+                    container.insertAdjacentHTML('beforeend', `
+                        <div class="bg-gray-50/50 dark:bg-gray-800/40 p-5 rounded-[1.5rem] border border-gray-100 dark:border-gray-700/50 hover:border-blue-200 transition duration-300 ${cardClass}">
+                            <div class="grid grid-cols-1 md:grid-cols-12 items-center gap-4">${content}</div>
+                        </div>`);
+                });
+            }
+
+            document.getElementById('pageInfo').innerText = `Halaman ${currentPage} dari ${totalPage}`;
+            document.getElementById('btnPrev').disabled = (currentPage === 1);
+            document.getElementById('btnNext').disabled = (currentPage === totalPage);
+            document.getElementById('paginationContainer').classList.toggle('hidden', limitVal === 'all' || totalPage <= 1);
+        }
+
+        function ubahHalaman(offset) {
+            currentPage += offset;
+            muatTabelHalaman();
+            document.getElementById('isiTabel').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function simpanData() {
+            const nama = document.getElementById('inputNama').value;
+            if(!nama) return alert("Nama wajib diisi!");
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            
+            const id = document.getElementById('editId').value || Date.now();
+            const obj = { id, tipe: currentMode, nama, namaKlien: document.getElementById('inputNamaKlien').value || "-", kat: document.getElementById('inputKategori').value, tgl: document.getElementById('inputTanggal').value, jam: document.getElementById('inputJam').value, wa: document.getElementById('inputKontak').value, lokasi: document.getElementById('inputLokasi').value, alamat: document.getElementById('inputAlamat').value, rekanan: document.getElementById('inputRekanan').value || "BELUM ADA", harga: document.getElementById('inputHarga').value || 0 };
+            
+            const idx = dataSimpanan.findIndex(i => i.id == id);
+            if(idx > -1) dataSimpanan[idx] = obj; else dataSimpanan.push(obj);
+
+            // LOGIKA SORTING v4.5.6: Sebelum kirim, urutkan data agar di Spreadsheet juga rapi
+            dataSimpanan.sort((a, b) => new Date(a.tgl || 0) - new Date(b.tgl || 0));
+
+            try {
+                await fetch(URL_SCRIPT + "?sheet=Agenda", { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataSimpanan) });
+                await tarikDataCloud();
+                bersihkanForm();
+            } catch (e) { alert("Error Cloud. Cek Koneksi."); }
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        function editData(id) {
+            const d = dataSimpanan.find(i => i.id == id);
+            if(!d) return;
+            setAppMode(d.tipe);
+            document.getElementById('editId').value = d.id;
+            document.getElementById('inputNama').value = d.nama;
+            document.getElementById('inputNamaKlien').value = d.namaKlien;
+            document.getElementById('inputKategori').value = d.kat;
+            document.getElementById('inputTanggal').value = d.tgl;
+            document.getElementById('inputJam').value = d.jam;
+            document.getElementById('inputKontak').value = d.wa;
+            document.getElementById('inputLokasi').value = d.lokasi;
+            document.getElementById('inputAlamat').value = d.alamat;
+            document.getElementById('inputHarga').value = d.harga;
+            document.getElementById('inputRekanan').value = d.rekanan;
+            autoFillHarga();
+            document.getElementById('formTitle').innerText = "Update Agenda";
+            document.getElementById('btnBatal').classList.remove('hidden');
+            document.getElementById('formContainer').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function hapusData(id) {
+            if(!confirm("Hapus agenda?")) return;
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            dataSimpanan = dataSimpanan.filter(i => i.id != id);
+            await fetch(URL_SCRIPT + "?sheet=Agenda", { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataSimpanan) });
+            await tarikDataCloud();
+            document.getElementById('loadingOverlay').classList.add('hidden');
         }
 
         function updateHighlights() {
-            const todayStr = new Date().toISOString().split('T')[0];
-            const hariIni = dataSimpanan.filter(d => d.tgl === todayStr);
-            document.getElementById('agendaHariIniList').innerHTML = hariIni.map(j => `
-                <div class="bg-white/5 p-5 rounded-2xl border border-white/10 flex justify-between items-center group hover:bg-white/10 transition">
-                    <div>
-                        <p class="text-[10px] font-black text-brand-400 uppercase italic mb-1">${j.jam} — ${j.lokasi}</p>
-                        <p class="text-sm font-black uppercase">${j.tipe === 'Vendor' ? j.namaKlien : j.nama}</p>
-                        <p class="text-[9px] opacity-40 font-bold mt-1 uppercase italic">MUA: ${j.nama} | Handler: ${j.rekanan || '-'}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-[8px] font-black text-brand-500 uppercase">Live Now</p>
-                    </div>
-                </div>
-            `).join('') || '<p class="opacity-30 italic text-[10px] py-4 uppercase tracking-[0.2em]">Tidak ada jadwal hari ini</p>';
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+            const allSorted = dataSimpanan.filter(d => d.tgl).sort((a,b) => new Date(a.tgl) - new Date(b.tgl));
+            const hariIni = allSorted.filter(d => d.tgl === todayStr);
             
-            const mendatang = dataSimpanan.filter(d => new Date(d.tgl) > new Date()).slice(0, 3);
-            document.getElementById('nextList').innerHTML = mendatang.map(m => `
-                <div class="border-b dark:border-slate-800 pb-3 last:border-0">
-                    <div class="flex justify-between items-start mb-1">
-                        <span class="text-[9px] font-black text-brand-600 uppercase">${m.tgl}</span>
-                        <span class="text-[8px] text-slate-400 font-bold italic">${m.jam}</span>
-                    </div>
-                    <p class="text-[11px] font-extrabold uppercase truncate">${m.tipe === 'Vendor' ? m.namaKlien : m.nama}</p>
-                    <p class="text-[8px] text-slate-500 truncate mt-1 italic uppercase">${m.lokasi}</p>
-                </div>
-            `).join('') || '<p class="opacity-30 italic text-[9px] uppercase">Belum ada jadwal baru</p>';
-
-            document.getElementById('statTotal').innerText = dataSimpanan.length;
-            document.getElementById('statVendor').innerText = dataSimpanan.filter(v => v.tipe === 'Vendor').length;
+            document.getElementById('agendaHariIniList').innerHTML = hariIni.length > 0 ? hariIni.map(j => `<div class="bg-white/10 p-4 rounded-2xl border border-white/5"><div class="flex justify-between items-start mb-1"><span class="text-[10px] font-black text-blue-300 uppercase">${j.jam || '-'}</span><span class="text-[8px] bg-white/20 px-2 py-0.5 rounded-full font-bold uppercase">${j.kat}</span></div><div class="text-sm font-black uppercase truncate">${j.tipe === 'Vendor' ? j.namaKlien : j.nama}</div></div>`).join("") : `<div class="text-xs opacity-50 italic">Tidak ada agenda hari ini</div>`;
+            
+            document.getElementById('statTotal').innerText = allSorted.filter(d => new Date(d.tgl).getMonth() === now.getMonth()).length;
+            document.getElementById('statVendor').innerText = allSorted.filter(d => d.tipe === 'Vendor' && new Date(d.tgl).getMonth() === now.getMonth()).length;
+            
+            const mendatang = allSorted.filter(d => new Date(d.tgl) > now).slice(0,5);
+            document.getElementById('nextList').innerHTML = mendatang.length > 0 ? mendatang.map(m => `<div class="border-b border-white/10 pb-2 mb-2"><div class="text-[8px] font-black text-blue-300 uppercase">${formatTanggalIndo(m.tgl)}</div><div class="text-[10px] font-extrabold uppercase truncate">${m.tipe === 'Vendor' ? m.namaKlien : m.nama}</div></div>`).join("") : `<div class="text-[10px] opacity-40">Kosong</div>`;
         }
 
-        function toggleAdmin() { if(prompt("System Password:") === "123456") { isAdmin = true; document.getElementById('mainBody').classList.add('is-admin'); document.getElementById('navAdmin').classList.remove('hidden'); updateBadge(); cariAgenda(); } }
-        function updateBadge() { document.getElementById('badgeMode').innerText = (isAdmin ? "SYSTEM ADMIN" : "CLIENT ACCESS") + " - " + currentMode; }
-        function autoFillHarga() { const p = dataPaket.find(x => x.namaPaket === document.getElementById('inputKategori').value); if(p) document.getElementById('inputHarga').value = p.hargaPaket; }
-
-        async function simpanData() {
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-            const obj = { id: document.getElementById('editId').value || Date.now(), tipe: currentMode, nama: document.getElementById('inputNama').value, namaKlien: document.getElementById('inputNamaKlien').value, kat: document.getElementById('inputKategori').value, tgl: document.getElementById('inputTanggal').value, jam: document.getElementById('inputJam').value, wa: document.getElementById('inputKontak').value, lokasi: document.getElementById('inputLokasi').value, alamat: document.getElementById('inputAlamat').value, rekanan: document.getElementById('inputRekanan').value, harga: document.getElementById('inputHarga').value };
-            await fetch(`${URL_SCRIPT}?sheet=Agenda`, { method: 'POST', mode: 'no-cors', body: JSON.stringify([...dataSimpanan.filter(i => i.id != obj.id), obj]) });
-            await tarikDataCloud(); bersihkanForm(); document.getElementById('loadingOverlay').classList.add('hidden');
-        }
-
-        async function hapusData(id) { if(confirm("Hapus agenda ini?")) { document.getElementById('loadingOverlay').classList.remove('hidden'); await fetch(`${URL_SCRIPT}?sheet=Agenda`, { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataSimpanan.filter(i => i.id != id)) }); await tarikDataCloud(); document.getElementById('loadingOverlay').classList.add('hidden'); } }
-        function editData(id) { const d = dataSimpanan.find(i => i.id == id); if(d) { document.getElementById('editId').value = d.id; document.getElementById('inputNama').value = d.nama; document.getElementById('inputNamaKlien').value = d.namaKlien; document.getElementById('inputKategori').value = d.kat; document.getElementById('inputTanggal').value = d.tgl; document.getElementById('inputJam').value = d.jam; document.getElementById('inputKontak').value = d.wa; document.getElementById('inputLokasi').value = d.lokasi; document.getElementById('inputAlamat').value = d.alamat; document.getElementById('inputHarga').value = d.harga; document.getElementById('inputRekanan').value = d.rekanan; document.getElementById('btnBatal').classList.remove('hidden'); document.getElementById('formContainer').scrollIntoView({ behavior: 'smooth' }); } }
-        function bersihkanForm() { ['editId','inputNama','inputNamaKlien','inputJam','inputKontak','inputLokasi','inputAlamat','inputHarga','inputRekanan'].forEach(id => document.getElementById(id).value = ''); document.getElementById('btnBatal').classList.add('hidden'); }
-        function switchTab(t) { document.getElementById('section-agenda').classList.toggle('hidden', t !== 'agenda'); document.getElementById('section-paket').classList.toggle('hidden', t !== 'paket'); document.getElementById('tab-agenda').className = t === 'agenda' ? 'px-6 py-3 rounded-xl text-[10px] font-black uppercase bg-white dark:bg-slate-800 shadow-sm' : 'px-6 py-3 rounded-xl text-[10px] font-black uppercase text-slate-400'; document.getElementById('tab-paket').className = t === 'paket' ? 'px-6 py-3 rounded-xl text-[10px] font-black uppercase bg-white dark:bg-slate-800 shadow-sm' : 'px-6 py-3 rounded-xl text-[10px] font-black uppercase text-slate-400'; }
-
-        async function simpanPaket() {
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-            const obj = { id: document.getElementById('editIdPaket').value || Date.now(), namaPaket: document.getElementById('p_nama').value, hargaPaket: document.getElementById('p_harga').value };
-            await fetch(`${URL_SCRIPT}?sheet=Paket`, { method: 'POST', mode: 'no-cors', body: JSON.stringify([...dataPaket.filter(i => i.id != obj.id), obj]) });
-            await tarikPaketCloud(); document.getElementById('loadingOverlay').classList.add('hidden');
-        }
-        function renderTabelPaket() { document.getElementById('isiTabelPaket').innerHTML = dataPaket.map(p => `<tr class="border-b dark:border-slate-800"><td class="py-4 px-4">${p.namaPaket}</td><td class="text-right px-4">Rp ${parseInt(p.hargaPaket).toLocaleString()}</td><td class="text-center px-4"><button onclick="editPaket(${p.id})" class="opacity-40 hover:opacity-100 transition">✏️</button></td></tr>`).join(''); }
-        function editPaket(id) { const p = dataPaket.find(x => x.id == id); if(p) { document.getElementById('editIdPaket').value = p.id; document.getElementById('p_nama').value = p.namaPaket; document.getElementById('p_harga').value = p.hargaPaket; } }
+        function aturPilihanPaket() { const s = document.getElementById('inputKategori'); s.innerHTML = dataPaket.length ? dataPaket.map(p => `<option value="${p.namaPaket}">${p.namaPaket}</option>`).join('') : '<option value="Default">Default</option>'; autoFillHarga(); }
+        function autoFillHarga() { const p = dataPaket.find(x => x.namaPaket === document.getElementById('inputKategori').value); if(p) { document.getElementById('inputHarga').value = p.hargaPaket; document.getElementById('textHargaDisplay').innerText = "Rp " + parseInt(p.hargaPaket).toLocaleString(); } }
+        function formatTanggalIndo(t) { const d = new Date(t); return isNaN(d.getTime()) ? t : d.toLocaleDateString('id-ID', {day:'2-digit', month:'long', year:'numeric'}); }
+        function toggleAdmin() { if(isAdmin) { location.reload(); return; } if(prompt("Pass:") === "123456") { isAdmin = true; document.getElementById('mainBody').classList.add('is-admin'); document.getElementById('tab-paket').classList.remove('hidden'); updateBadge(); resetHalamanDanCari(); } }
+        function switchTab(t) { document.getElementById('section-agenda').classList.toggle('hidden', t !== 'agenda'); document.getElementById('section-paket').classList.toggle('hidden', t !== 'paket'); }
+        function bersihkanForm() { document.getElementById('editId').value = ''; document.getElementById('formTitle').innerText = "Input Data"; document.getElementById('btnBatal').classList.add('hidden'); ['inputNama','inputNamaKlien','inputJam','inputKontak','inputLokasi','inputAlamat','inputRekanan','inputHarga'].forEach(i => document.getElementById(i).value = ''); }
+        function updateBadge() { document.getElementById('badgeMode').innerText = isAdmin ? "MODE: ADMIN (" + currentMode + ")" : "MODE: " + currentMode; }
+        document.getElementById('themeToggle').onclick = () => document.documentElement.classList.toggle('dark');
+        
+        async function simpanPaket() { const nama = document.getElementById('p_nama').value; if(!nama) return; document.getElementById('loadingOverlay').classList.remove('hidden'); const id = document.getElementById('editIdPaket').value || Date.now(); const obj = { id, namaPaket: nama, hargaPaket: document.getElementById('p_harga').value || 0, deskripsi: document.getElementById('p_desc').value || "" }; const idx = dataPaket.findIndex(p => p.id == id); if(idx > -1) dataPaket[idx] = obj; else dataPaket.push(obj); await fetch(URL_SCRIPT + "?sheet=Paket", { method: 'POST', mode: 'no-cors', body: JSON.stringify(dataPaket) }); await tarikPaketCloud(); document.getElementById('loadingOverlay').classList.add('hidden'); }
+        function renderTabelPaket() { const container = document.getElementById('isiTabelPaket'); container.innerHTML = dataPaket.map(p => `<tr class="border-b dark:border-gray-700"><td class="py-4 px-4 italic">${p.namaPaket}</td><td class="text-right px-4">Rp ${parseInt(p.hargaPaket || 0).toLocaleString()}</td><td class="text-center px-4"><button onclick="editPaket(${p.id})" class="p-2 opacity-50">✏️</button></td></tr>`).join(''); }
     </script>
 </body>
 </html>
