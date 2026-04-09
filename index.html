@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Veridical.co - Cloud v4.7.6</title>
+    <title>Veridical.co - Cloud v4.7.7</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: 'class' }</script>
     <style>
@@ -104,10 +104,15 @@
                         <input type="hidden" id="editId">
                         <input type="text" id="inputNama" placeholder="Nama" class="w-full p-4 rounded-2xl border dark:bg-gray-700 font-bold outline-none">
                         <div id="containerNamaKlien" class="hidden"><input type="text" id="inputNamaKlien" placeholder="Nama Klien (Opsional)" class="w-full p-4 rounded-2xl border border-purple-100 dark:bg-gray-700 font-bold italic"></div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <select id="inputKategori" onchange="autoFillHarga()" class="p-4 rounded-2xl border dark:bg-gray-700 font-bold outline-none"></select>
-                            <input type="date" id="inputTanggal" class="p-4 rounded-2xl border dark:bg-gray-700 outline-none font-bold">
+                        
+                        <div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <select id="inputKategori" onchange="autoFillHarga()" class="p-4 rounded-2xl border dark:bg-gray-700 font-bold outline-none"></select>
+                                <input type="date" id="inputTanggal" class="p-4 rounded-2xl border dark:bg-gray-700 outline-none font-bold">
+                            </div>
+                            <div id="displayDescPaket" class="mt-2 px-4 text-[10px] font-semibold text-gray-400 italic leading-relaxed hidden"></div>
                         </div>
+
                         <div id="containerHarga"><input type="number" id="inputHarga" placeholder="Harga IDR" class="w-full p-4 rounded-2xl border border-green-100 dark:bg-gray-700 font-bold" readonly></div>
                         <input type="text" id="inputJam" placeholder="Jam (08:00 - Selesai)" class="w-full p-4 rounded-2xl border dark:bg-gray-700">
                         <input type="text" id="inputKontak" placeholder="WhatsApp" class="w-full p-4 rounded-2xl border dark:bg-gray-700">
@@ -324,7 +329,6 @@
             if(t === 'datasheet') renderRawData();
         }
 
-        // FUNGSI DATA SHEET
         function renderRawData() {
             if (!dataSimpanan.length) return;
             const headers = Object.keys(dataSimpanan[0]);
@@ -342,7 +346,6 @@
             window.getSelection().removeAllRanges();
         }
 
-        // LOGIKA KEUANGAN & STATISTIK (DARI FILE ASLI ANDA)
         function renderKeuangan() {
             const thn = document.getElementById('f-filterTahun').value;
             const bln = document.getElementById('f-filterBulan').value;
@@ -408,7 +411,6 @@
             document.getElementById('stat-monthlyTrend').innerHTML = last6Months.map(target => { const count = dataSimpanan.filter(d => d.tgl && parseInt(d.tgl.split('-')[1]) === target.m && parseInt(d.tgl.split('-')[0]) === target.y).length; const height = Math.min(100, (count / 15) * 100); return `<div class="flex flex-col items-center flex-1"><div class="text-[9px] font-black text-blue-600 mb-1">${count}</div><div class="w-full bg-blue-100 dark:bg-gray-700 rounded-t-lg relative" style="height: 120px"><div class="absolute bottom-0 left-0 w-full bg-blue-600 rounded-t-lg transition-all duration-1000" style="height: ${height}%"></div></div><div class="text-[8px] font-black uppercase mt-2 opacity-50">${target.label}</div></div>`; }).join("");
         }
 
-        // LOGIKA DASAR (AGENDA & PAKET)
         function resetPageAndSearch() { currentPage = 1; cariAgenda(); }
         function cariAgenda() { 
             const searchVal = document.getElementById('searchInput').value.toLowerCase();
@@ -489,7 +491,7 @@
             await tarikDataCloud(); bersihkanForm(); document.getElementById('loadingOverlay').classList.add('hidden');
         }
 
-        function editData(id) { const d = dataSimpanan.find(i => i.id == id); if(!d) return; setAppMode(d.tipe); document.getElementById('editId').value = d.id; document.getElementById('inputNama').value = d.nama; document.getElementById('inputNamaKlien').value = d.namaKlien; document.getElementById('inputKategori').value = d.kat; document.getElementById('inputTanggal').value = d.tgl; document.getElementById('inputJam').value = d.jam; document.getElementById('inputKontak').value = d.wa; document.getElementById('inputLokasi').value = d.lokasi; document.getElementById('inputAlamat').value = d.alamat; document.getElementById('inputHarga').value = d.harga; document.getElementById('inputRekanan').value = d.rekanan; document.getElementById('formTitle').innerText = "Update Data"; document.getElementById('btnBatal').classList.remove('hidden'); document.getElementById('formContainer').scrollIntoView({ behavior: 'smooth' }); }
+        function editData(id) { const d = dataSimpanan.find(i => i.id == id); if(!d) return; setAppMode(d.tipe); document.getElementById('editId').value = d.id; document.getElementById('inputNama').value = d.nama; document.getElementById('inputNamaKlien').value = d.namaKlien; document.getElementById('inputKategori').value = d.kat; document.getElementById('inputTanggal').value = d.tgl; document.getElementById('inputJam').value = d.jam; document.getElementById('inputKontak').value = d.wa; document.getElementById('inputLokasi').value = d.lokasi; document.getElementById('inputAlamat').value = d.alamat; document.getElementById('inputHarga').value = d.harga; document.getElementById('inputRekanan').value = d.rekanan; autoFillHarga(); document.getElementById('formTitle').innerText = "Update Data"; document.getElementById('btnBatal').classList.remove('hidden'); document.getElementById('formContainer').scrollIntoView({ behavior: 'smooth' }); }
         async function hapusData(id) { if(!confirm("Hapus agenda?")) return; document.getElementById('loadingOverlay').classList.remove('hidden'); const newArray = dataSimpanan.filter(i => i.id != id); await fetch(URL_SCRIPT + "?sheet=Agenda", { method: 'POST', mode: 'no-cors', body: JSON.stringify(newArray) }); await tarikDataCloud(); document.getElementById('loadingOverlay').classList.add('hidden'); }
         function setAppMode(mode) { 
             document.getElementById('containerNamaKlien').classList.toggle('hidden', mode !== 'Vendor'); 
@@ -499,9 +501,29 @@
         }
         function updateBadge() { document.getElementById('badgeMode').innerText = isAdmin ? "MODE: ADMIN" : "MODE: " + currentMode; }
         document.getElementById('themeToggle').onclick = () => document.documentElement.classList.toggle('dark');
-        function bersihkanForm() { document.getElementById('editId').value = ''; document.getElementById('formTitle').innerText = "Input Data"; document.getElementById('btnBatal').classList.add('hidden'); ['inputNama','inputNamaKlien','inputJam','inputKontak','inputLokasi','inputAlamat','inputHarga','inputRekanan'].forEach(i => document.getElementById(i).value = ''); }
+        function bersihkanForm() { 
+            document.getElementById('editId').value = ''; 
+            document.getElementById('formTitle').innerText = "Input Data"; 
+            document.getElementById('btnBatal').classList.add('hidden'); 
+            document.getElementById('displayDescPaket').classList.add('hidden');
+            ['inputNama','inputNamaKlien','inputJam','inputKontak','inputLokasi','inputAlamat','inputHarga','inputRekanan'].forEach(i => document.getElementById(i).value = ''); 
+        }
         function aturPilihanPaket() { const s = document.getElementById('inputKategori'); s.innerHTML = dataPaket.length ? dataPaket.map(p => `<option value="${p.namaPaket}">${p.namaPaket}</option>`).join('') : '<option value="Default">Default</option>'; }
-        function autoFillHarga() { const p = dataPaket.find(x => x.namaPaket === document.getElementById('inputKategori').value); if(p) { document.getElementById('inputHarga').value = p.hargaPaket; } }
+        
+        // Pembaruan: Menambahkan tampilan deskripsi saat paket dipilih
+        function autoFillHarga() { 
+            const p = dataPaket.find(x => x.namaPaket === document.getElementById('inputKategori').value); 
+            const descEl = document.getElementById('displayDescPaket');
+            if(p) { 
+                document.getElementById('inputHarga').value = p.hargaPaket; 
+                if(p.deskripsi) {
+                    descEl.innerText = "Info: " + p.deskripsi;
+                    descEl.classList.remove('hidden');
+                } else {
+                    descEl.classList.add('hidden');
+                }
+            } 
+        }
     </script>
 </body>
 </html>
