@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Veridical.co - Cloud v4.7.7</title>
+    <title>Veridical.co - Cloud v4.7.8</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>tailwind.config = { darkMode: 'class' }</script>
     <style>
@@ -482,10 +482,13 @@
         
         async function simpanData() {
             const nama = document.getElementById('inputNama').value; if(!nama) return alert("Nama wajib!");
+            const kat = document.getElementById('inputKategori').value;
+            if(!kat || kat === "") return alert("Pilih paket terlebih dahulu!");
+            
             document.getElementById('loadingOverlay').classList.remove('hidden');
             const id = document.getElementById('editId').value || Date.now();
             const exist = dataSimpanan.find(i => i.id == id) || {};
-            const obj = { ...exist, id, tipe: currentMode, nama, namaKlien: document.getElementById('inputNamaKlien').value || "-", kat: document.getElementById('inputKategori').value, tgl: document.getElementById('inputTanggal').value, jam: document.getElementById('inputJam').value, wa: document.getElementById('inputKontak').value, lokasi: document.getElementById('inputLokasi').value, alamat: document.getElementById('inputAlamat').value, rekanan: document.getElementById('inputRekanan').value || "-", harga: document.getElementById('inputHarga').value || 0 };
+            const obj = { ...exist, id, tipe: currentMode, nama, namaKlien: document.getElementById('inputNamaKlien').value || "-", kat: kat, tgl: document.getElementById('inputTanggal').value, jam: document.getElementById('inputJam').value, wa: document.getElementById('inputKontak').value, lokasi: document.getElementById('inputLokasi').value, alamat: document.getElementById('inputAlamat').value, rekanan: document.getElementById('inputRekanan').value || "-", harga: document.getElementById('inputHarga').value || 0 };
             const newArray = [...dataSimpanan.filter(i => i.id != id), obj];
             await fetch(URL_SCRIPT + "?sheet=Agenda", { method: 'POST', mode: 'no-cors', body: JSON.stringify(newArray) });
             await tarikDataCloud(); bersihkanForm(); document.getElementById('loadingOverlay').classList.add('hidden');
@@ -507,10 +510,21 @@
             document.getElementById('btnBatal').classList.add('hidden'); 
             document.getElementById('displayDescPaket').classList.add('hidden');
             ['inputNama','inputNamaKlien','inputJam','inputKontak','inputLokasi','inputAlamat','inputHarga','inputRekanan'].forEach(i => document.getElementById(i).value = ''); 
+            document.getElementById('inputKategori').value = ""; // Reset ke placeholder
         }
-        function aturPilihanPaket() { const s = document.getElementById('inputKategori'); s.innerHTML = dataPaket.length ? dataPaket.map(p => `<option value="${p.namaPaket}">${p.namaPaket}</option>`).join('') : '<option value="Default">Default</option>'; }
         
-        // Pembaruan: Menambahkan tampilan deskripsi saat paket dipilih
+        // Pembaruan: Menambahkan placeholder pada pilihan paket
+        function aturPilihanPaket() { 
+            const s = document.getElementById('inputKategori'); 
+            let options = '<option value="" disabled selected>-- Pilih Paket --</option>';
+            if(dataPaket.length) {
+                options += dataPaket.map(p => `<option value="${p.namaPaket}">${p.namaPaket}</option>`).join('');
+            } else {
+                options += '<option value="Default">Default</option>';
+            }
+            s.innerHTML = options;
+        }
+        
         function autoFillHarga() { 
             const p = dataPaket.find(x => x.namaPaket === document.getElementById('inputKategori').value); 
             const descEl = document.getElementById('displayDescPaket');
@@ -522,7 +536,10 @@
                 } else {
                     descEl.classList.add('hidden');
                 }
-            } 
+            } else {
+                document.getElementById('inputHarga').value = 0;
+                descEl.classList.add('hidden');
+            }
         }
     </script>
 </body>
